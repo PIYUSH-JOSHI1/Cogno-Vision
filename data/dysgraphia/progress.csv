@@ -1,0 +1,17 @@
+user_id,activity,text_sample,word_count,issues_count,timestamp
+user_001,writing_analysis,"Writing Prompt: Write about your family
+
+Writing Prompt: What makes you happy?
+
+Writing Prompt: Desc...",24,5,2025-08-06T22:13:30.878936
+user_001,writing_analysis,story,1,1,2025-08-06T22:14:51.830128
+user_001,writing_analysis,My village is good.,4,1,2025-08-06T22:15:22.040831
+user_001,writing_analysis,peacocb,1,3,2025-08-06T22:16:08.742961
+user_001,writing_analysis,"Writing Prompt: Describe your favorite food
+dosa
+peacocb",8,3,2025-08-06T22:16:42.193539
+user_001,writing_analysis,do something,2,2,2025-08-06T22:58:39.383812
+user_001,writing_analysis,go to badminton,3,4,2025-08-06T23:06:03.211619
+user_001,writing_analysis,hgjk,1,1,2025-08-06T23:43:02.759005
+user_001,writing_analysis,dfgdfhdfbzvc,1,3,2025-08-06T23:47:26.424388
+user_001,writing_analysis,i help someone when they have no one to help,10,4,2025-08-07T00:01:33.009379

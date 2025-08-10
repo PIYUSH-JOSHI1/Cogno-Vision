@@ -1,0 +1,7 @@
+user_id,activity,exercise_name,duration,stability_score,timestamp
+user_001,balance_training,Stand on One Foot,10.007,100,2025-08-06T22:20:02.718057
+
+268c520b-53be-41a5-a9dc-9938e9576ff6,balance_training,Tandem Stance,15.021,99.0,2025-08-10T20:11:50.408811
+268c520b-53be-41a5-a9dc-9938e9576ff6,balance_training,March in Place,26.066,100.0,2025-08-10T20:13:36.193935
+268c520b-53be-41a5-a9dc-9938e9576ff6,balance_training,Single Leg Stand,15.046,99.0,2025-08-10T20:46:37.353948
+268c520b-53be-41a5-a9dc-9938e9576ff6,balance_training,Weight Shift Balance,25.001,92.0,2025-08-10T23:00:36.307874

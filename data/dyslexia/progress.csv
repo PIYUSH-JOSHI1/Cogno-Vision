@@ -1,0 +1,17 @@
+user_id,activity,original_text,difficulty,word_count,readability_score,timestamp
+user_001,text_simplification,something,Hard,1,Very Difficult,2025-08-07T00:02:34.088700
+user_001,text_simplification,something i have to write on paper,Easy,7,Fairly Easy,2025-08-07T00:03:06.961096
+user_001,text_simplification,anamika could you pls shut your moth up,Easy,8,Easy,2025-08-07T00:03:53.806728
+user_001,text_simplification,anamika could you please shut your moth up,Medium,8,Easy,2025-08-07T00:04:18.768658
+user_001,text_simplification,anamika could you please shut your mouth up,Medium,8,Easy,2025-08-07T00:04:28.914734
+user_001,text_simplification,anamika shut the fuck up,Medium,5,Standard,2025-08-07T00:04:48.800025
+49813991-f540-4f74-97c1-51f6cd74bbcf,text_simplification,there is something to tell,Medium,5,Easy,2025-08-07T00:33:14.552813
+49813991-f540-4f74-97c1-51f6cd74bbcf,text_simplification,gvhkgcxgndx,Hard,1,Very Easy,2025-08-07T01:51:40.047163
+49813991-f540-4f74-97c1-51f6cd74bbcf,text_simplification,dfhfhdg,Hard,1,Very Easy,2025-08-07T01:53:53.282515
+49813991-f540-4f74-97c1-51f6cd74bbcf,text_simplification,anamika is bad girl,Medium,4,Fairly Difficult,2025-08-07T01:54:23.231857
+268c520b-53be-41a5-a9dc-9938e9576ff6,text_simplification,kjhufuv,Hard,1,Difficult,2025-08-07T02:12:31.990013
+268c520b-53be-41a5-a9dc-9938e9576ff6,text_simplification,gfgchhhhhhhhhhhh,Hard,1,Very Easy,2025-08-07T02:16:31.385119
+268c520b-53be-41a5-a9dc-9938e9576ff6,text_simplification,gfgchhhhhhhhhhhhghhghhnmnmnmmnnmnmmn,Hard,1,Very Easy,2025-08-07T02:17:25.836538
+268c520b-53be-41a5-a9dc-9938e9576ff6,text_simplification,gfgchhhhhhhhhhhhghhghhnmnmnmmnnmnmmn,Hard,1,Very Easy,2025-08-07T02:17:53.739714
+268c520b-53be-41a5-a9dc-9938e9576ff6,text_simplification,dsthsrthj,Hard,1,Very Easy,2025-08-10T19:32:43.628954
+268c520b-53be-41a5-a9dc-9938e9576ff6,text_simplification,awrgare hrthrt,Hard,2,Fairly Easy,2025-08-10T20:10:30.207899

@@ -1,0 +1,5 @@
+id,username,email,password_hash,role,age,conditions,created_at
+user_001,demo_child,child@demo.com,d3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791,child,10,"dyslexia,dyscalculia",2025-08-06T22:05:09.752029
+user_002,demo_parent,parent@demo.com,d3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791,parent,35,,2025-08-06T22:05:09.752029
+49813991-f540-4f74-97c1-51f6cd74bbcf,dfkljgnlk,something@gmail.com,591a0ba7e5d50babb5c6b7c31e39c3aab2f4bf4cb5ea72378b2f5e24942b8b71,child,12,"dyslexia,dyscalculia,dysgraphia,dyspraxia",2025-08-07T00:15:38.179162
+268c520b-53be-41a5-a9dc-9938e9576ff6,anamika,anamika302004@gmail.com,421ddc2e2bffd6bdc253e1fd1140886a66b54f4baa72f70b90cf31abbf1ea60a,child,21,dyslexia,2025-08-07T02:10:33.183150
