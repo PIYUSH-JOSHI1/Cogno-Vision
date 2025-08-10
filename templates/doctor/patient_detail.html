@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10 px-4">
+  <div class="bg-white shadow-lg rounded-lg p-8 border border-blue-200 mb-8">
+    <div class="flex items-center mb-8">
+      <div class="bg-blue-100 rounded-full p-4">
+        <i class="fa-solid fa-user text-3xl text-blue-600"></i>
+      </div>
+      <div class="ml-4">
+        <h2 class="text-3xl font-bold text-blue-700 mb-1">Patient Full Report</h2>
+        <p class="text-gray-500">Comprehensive activity and progress overview</p>
+      </div>
+    </div>
+    {% if patient %}
+      <section class="mb-8">
+        <h3 class="text-xl font-semibold text-blue-700 mb-4">Patient Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <div class="mb-2"><span class="font-semibold">Name:</span> {{ patient.username }}</div>
+            <div class="mb-2"><span class="font-semibold">Email:</span> {{ patient.email }}</div>
+          </div>
+          <div>
+            <div class="mb-2"><span class="font-semibold">Age:</span> {{ patient.age }}</div>
+            <div class="mb-2"><span class="font-semibold">Conditions:</span> {{ patient.conditions }}</div>
+          </div>
+        </div>
+      </section>
+      <hr class="my-8">
+      <section class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-semibold text-blue-700">All Activities & Reports</h3>
+          {% if all_activities and all_activities|length > 0 %}
+            <a href="{{ url_for('doctor.download_patient_report', patient_id=patient.id) }}" class="btn btn-success">Download Full Report (CSV)</a>
+          {% endif %}
+        </div>
+        {% if all_activities and all_activities|length > 0 %}
+          <div class="overflow-x-auto rounded-lg border border-blue-100">
+            <table class="min-w-full bg-white">
+              <thead class="bg-blue-50">
+                <tr>
+                  <th class="py-2 px-4 border-b text-left">Source</th>
+                  {% for key in all_activities[0].keys() if key != 'activity_source' %}
+                    <th class="py-2 px-4 border-b text-left">{{ key|replace('_', ' ')|title }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in all_activities %}
+                  <tr class="hover:bg-blue-50 transition">
+                    <td class="py-2 px-4 border-b">{{ row['activity_source'] }}</td>
+                    {% for key, value in row.items() if key != 'activity_source' %}
+                      <td class="py-2 px-4 border-b">{{ value }}</td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-gray-500">No activity data found for this patient.</p>
+        {% endif %}
+      </section>
+    {% else %}
+      <p class="text-red-500">Patient not found.</p>
+    {% endif %}
+    <div class="mt-8">
+      <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

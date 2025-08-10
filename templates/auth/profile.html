@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Cogno Solution{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">User Profile</h1>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h2 class="text-xl font-semibold mb-4">Personal Information</h2>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Username</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ user.username }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Email</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ user.email }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Role</label>
+                            <p class="mt-1 text-sm text-gray-900 capitalize">{{ user.role }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Age</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ user.age or 'Not specified' }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h2 class="text-xl font-semibold mb-4">Learning Conditions</h2>
+                    <div class="space-y-2">
+                        {% if user.conditions %}
+                            {% for condition in user.conditions.split(',') %}
+                                {% if condition.strip() %}
+                                <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                    {{ condition.strip().title() }}
+                                </span>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-sm text-gray-500">No conditions specified</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t">
+                <h2 class="text-xl font-semibold mb-4">Account Settings</h2>
+                <div class="space-y-4">
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" onclick="openEditProfileModal()">
+                        Edit Profile
+                    </button>
+                    <button class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 ml-2" onclick="openChangePasswordModal()">
+                        Change Password
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h3 class="text-xl font-semibold mb-4">Edit Profile</h3>
+        <form id="editProfileForm">
+            <div class="mb-3">
+                <label class="block text-sm font-medium">Username</label>
+                <input type="text" name="username" id="editUsername" class="w-full border rounded px-3 py-2" required>
+            </div>
+            <div class="mb-3">
+                <label class="block text-sm font-medium">Email</label>
+                <input type="email" name="email" id="editEmail" class="w-full border rounded px-3 py-2" required>
+            </div>
+            <div class="mb-3">
+                <label class="block text-sm font-medium">Age</label>
+                <input type="number" name="age" id="editAge" class="w-full border rounded px-3 py-2">
+            </div>
+            <div class="mb-3">
+                <label class="block text-sm font-medium">Learning Conditions (comma separated)</label>
+                <input type="text" name="conditions" id="editConditions" class="w-full border rounded px-3 py-2">
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" onclick="closeEditProfileModal()" class="px-4 py-2 rounded bg-gray-300">Cancel</button>
+                <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="changePasswordModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h3 class="text-xl font-semibold mb-4">Change Password</h3>
+        <form id="changePasswordForm">
+            <div class="mb-3">
+                <label class="block text-sm font-medium">Old Password</label>
+                <input type="password" name="old_password" id="oldPassword" class="w-full border rounded px-3 py-2" required>
+            </div>
+            <div class="mb-3">
+                <label class="block text-sm font-medium">New Password</label>
+                <input type="password" name="new_password" id="newPassword" class="w-full border rounded px-3 py-2" required>
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" onclick="closeChangePasswordModal()" class="px-4 py-2 rounded bg-gray-300">Cancel</button>
+                <button type="submit" class="px-4 py-2 rounded bg-gray-700 text-white">Change</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Modal open/close helpers
+function openEditProfileModal() {
+    document.getElementById('editProfileModal').classList.remove('hidden');
+    // Prefill with current user data
+    document.getElementById('editUsername').value = '{{ user.username }}';
+    document.getElementById('editEmail').value = '{{ user.email }}';
+    document.getElementById('editAge').value = '{{ user.age }}';
+    document.getElementById('editConditions').value = '{{ user.conditions }}';
+}
+function closeEditProfileModal() {
+    document.getElementById('editProfileModal').classList.add('hidden');
+}
+function openChangePasswordModal() {
+    document.getElementById('changePasswordModal').classList.remove('hidden');
+}
+function closeChangePasswordModal() {
+    document.getElementById('changePasswordModal').classList.add('hidden');
+}
+
+// Edit profile AJAX
+document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const data = {
+        username: document.getElementById('editUsername').value,
+        email: document.getElementById('editEmail').value,
+        age: document.getElementById('editAge').value,
+        conditions: document.getElementById('editConditions').value
+    };
+    const res = await fetch('/profile/edit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.success) {
+        alert('Profile updated!');
+        closeEditProfileModal();
+        location.reload();
+    } else {
+        alert(result.message || 'Error updating profile');
+    }
+});
+
+// Change password AJAX
+document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const data = {
+        old_password: document.getElementById('oldPassword').value,
+        new_password: document.getElementById('newPassword').value
+    };
+    const res = await fetch('/profile/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.success) {
+        alert('Password changed!');
+        closeChangePasswordModal();
+    } else {
+        alert(result.message || 'Error changing password');
+    }
+});
+</script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadProfileStats();
+});
+
+async function loadProfileStats() {
+    try {
+        const response = await fetch('/dashboard/data');
+        const result = await response.json();
+        
+        if (result.success) {
+            displayProfileStats(result.data);
+        }
+    } catch (error) {
+        console.error('Error loading profile stats:', error);
+    }
+}
+
+function displayProfileStats(data) {
+    const container = document.getElementById('profileStats');
+    
+    container.innerHTML = `
+        <div class="grid grid-2" style="gap: 1rem;">
+            <div style="text-align: center; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #3b82f6;">${data.overall_stats.total_activities}</div>
+                <div style="color: #64748b;">Total Activities</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #10b981;">${data.overall_stats.active_days}</div>
+                <div style="color: #64748b;">Active Days</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #f59e0b;">${data.overall_stats.streak}</div>
+                <div style="color: #64748b;">Day Streak</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #ef4444;">85%</div>
+                <div style="color: #64748b;">Avg Score</div>
+            </div>
+        </div>
+    `;
+}
+</script>
+{% endblock %}

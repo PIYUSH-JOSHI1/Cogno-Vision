@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Phonics Games - Cogno Solution{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold dyslexic-font mb-4">🎮 Phonics Games</h1>
+        <p class="text-xl text-gray-600">Interactive games to improve phonics skills and reading fluency</p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for game_id, game in games.items() %}
+        <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+            <div class="text-center mb-4">
+                <div class="text-4xl mb-2">
+                    {% if game.category == 'Phonics' %}🔤{% else %}📝{% endif %}
+                </div>
+                <h3 class="text-xl font-bold mb-2">{{ game.name }}</h3>
+                <p class="text-gray-600 mb-4">{{ game.description }}</p>
+            </div>
+            
+            <div class="flex justify-between items-center mb-4">
+                <span class="px-3 py-1 bg-{{ 'green' if game.difficulty == 'Easy' else 'yellow' if game.difficulty == 'Medium' else 'red' }}-100 text-{{ 'green' if game.difficulty == 'Easy' else 'yellow' if game.difficulty == 'Medium' else 'red' }}-800 rounded-full text-sm font-medium">
+                    {{ game.difficulty }}
+                </span>
+                <span class="text-sm text-gray-500">Max: {{ game.max_score }} pts</span>
+            </div>
+            
+            <button onclick="startGame('{{ game.id }}')" 
+                    class="w-full bg-dyslexia-blue text-white py-3 px-4 rounded-lg text-lg font-medium hover:bg-blue-600 transition-colors">
+                Start Game ▶
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Game Modal -->
+    <div id="gameModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="gameTitle" class="text-2xl font-bold"></h2>
+                <button id="closeGameModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            
+            <div id="gameContent"></div>
+            
+            <div class="mt-6 flex justify-between">
+                <div id="gameScore" class="text-lg font-semibold"></div>
+                <button id="submitGame" class="bg-dyslexia-green text-white px-6 py-2 rounded-lg hover:bg-green-600 hidden">
+                    Submit Answers
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/games.js"></script>
+{% endblock %}

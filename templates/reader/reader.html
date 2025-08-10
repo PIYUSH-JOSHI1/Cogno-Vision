@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Reader - Cogno Solution{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-bold dyslexic-font">📖 Dyslexia-Friendly Reader</h1>
+            <button id="settingsBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">
+                ⚙️ Settings
+            </button>
+        </div>
+        
+        <!-- Settings Panel -->
+        <div id="settingsPanel" class="hidden bg-gray-50 p-4 rounded-lg mb-6">
+            <div class="grid md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Font Size</label>
+                    <div class="flex items-center space-x-2">
+                        <button id="fontSizeDown" class="bg-gray-200 px-3 py-1 rounded">-</button>
+                        <span id="fontSizeValue" class="px-3">{{ user.font_size }}px</span>
+                        <button id="fontSizeUp" class="bg-gray-200 px-3 py-1 rounded">+</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Line Spacing</label>
+                    <div class="flex items-center space-x-2">
+                        <button id="lineSpacingDown" class="bg-gray-200 px-3 py-1 rounded">-</button>
+                        <span id="lineSpacingValue" class="px-3">{{ user.line_spacing }}</span>
+                        <button id="lineSpacingUp" class="bg-gray-200 px-3 py-1 rounded">+</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Contrast</label>
+                    <select id="contrastMode" class="w-full px-3 py-1 border rounded">
+                        <option value="normal" {{ 'selected' if user.contrast_mode == 'normal' }}>Normal</option>
+                        <option value="high" {{ 'selected' if user.contrast_mode == 'high' }}>High Contrast</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Font</label>
+                    <select id="fontFamily" class="w-full px-3 py-1 border rounded">
+                        <option value="OpenDyslexic" {{ 'selected' if user.preferred_font == 'OpenDyslexic' }}>OpenDyslexic</option>
+                        <option value="Lexend" {{ 'selected' if user.preferred_font == 'Lexend' }}>Lexend</option>
+                        <option value="Arial" {{ 'selected' if user.preferred_font == 'Arial' }}>Arial</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mt-4 flex items-center space-x-4">
+                <label class="flex items-center">
+                    <input type="checkbox" id="readingRuler" class="mr-2">
+                    <span>Reading Ruler</span>
+                </label>
+                <button id="saveSettings" class="bg-dyslexia-blue text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Save Settings
+                </button>
+            </div>
+        </div>
+        
+        <!-- Text Input Area -->
+        <div class="mb-6">
+            <label for="textInput" class="block text-lg font-medium text-gray-700 mb-2">
+                Paste or type your text here:
+            </label>
+            <textarea id="textInput" rows="6" 
+                      class="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-dyslexia-blue focus:border-transparent"
+                      placeholder="Enter text to read and simplify..."></textarea>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-4 mb-6">
+            <button id="simplifyBtn" class="bg-dyslexia-green text-white px-6 py-3 rounded-lg text-lg font-medium hover:bg-green-600 transition-colors">
+                🔄 Simplify Text
+            </button>
+            <button id="readAloudBtn" class="bg-dyslexia-yellow text-white px-6 py-3 rounded-lg text-lg font-medium hover:bg-yellow-600 transition-colors">
+                🔊 Read Aloud
+            </button>
+            <button id="annotateBtn" class="bg-purple-500 text-white px-6 py-3 rounded-lg text-lg font-medium hover:bg-purple-600 transition-colors">
+                📝 Annotate
+            </button>
+            <button id="stopBtn" class="bg-dyslexia-red text-white px-6 py-3 rounded-lg text-lg font-medium hover:bg-red-600 transition-colors hidden">
+                ⏹️ Stop
+            </button>
+        </div>
+        
+        <!-- Reading Ruler -->
+        <div id="readingRulerOverlay" class="reading-ruler hidden"></div>
+        
+        <!-- Text Display Area -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- Original Text -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Original Text</h3>
+                <div id="originalText" class="text-content min-h-32 p-4 bg-white rounded border">
+                    <p class="text-gray-500 italic">Original text will appear here...</p>
+                </div>
+            </div>
+            
+            <!-- Simplified Text -->
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h3 class="text-xl font-semibold mb-4 text-dyslexia-blue">Simplified Text</h3>
+                <div id="simplifiedText" class="text-content min-h-32 p-4 bg-white rounded border">
+                    <p class="text-gray-500 italic">Simplified text will appear here...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Annotations Panel -->
+        <div id="annotationsPanel" class="hidden mt-6 bg-yellow-50 p-4 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4 text-yellow-800">Text Analysis</h3>
+            <div id="annotationsContent"></div>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-dyslexia-blue mx-auto mb-4"></div>
+                <p class="text-lg">Processing text...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/reader.js"></script>
+{% endblock %}

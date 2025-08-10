@@ -1,0 +1,1360 @@
+{% extends "base.html" %}
+
+{% block title %}Coordination Games - Dyspraxia Support{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">🎮 Coordination Games for Young People</h1>
+        
+        <!-- Age-Appropriate Notice -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-blue-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-blue-700">
+                        These games are specially designed for young people aged 10-18 with dyspraxia to improve coordination, 
+                        hand-eye coordination, and motor planning skills in a fun, engaging way.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Camera Setup -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">🎥 Camera Setup</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <video id="cameraFeed" class="w-full h-64 bg-gray-200 rounded-lg" autoplay muted playsinline></video>
+                    <div class="mt-4 space-x-4">
+                        <button id="startCamera" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-video"></i> Start Camera
+                        </button>
+                        <button id="stopCamera" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors" disabled>
+                            <i class="fas fa-video-slash"></i> Stop Camera
+                        </button>
+                    </div>
+                    <div id="cameraStatus" class="mt-2 text-sm text-gray-600">Camera not active</div>
+                </div>
+                <div>
+                    <canvas id="poseCanvas" class="w-full h-64 border-2 border-green-200 rounded-lg bg-gray-50"></canvas>
+                    <div class="mt-4">
+                        <div id="gestureStatus" class="text-lg font-semibold text-gray-700">
+                            Gesture: <span id="currentGesture" class="text-blue-600">None detected</span>
+                        </div>
+                        <div id="handStatus" class="text-sm text-gray-600 mt-1">
+                            Hand: <span id="handDetection" class="text-green-600">Ready</span>
+                        </div>
+                        <div id="confidenceLevel" class="text-sm text-gray-600 mt-1">
+                            Detection: <span id="confidence" class="text-green-600">Ready</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Selection -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Rock Paper Scissors -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="text-4xl mb-4">✂️</div>
+                <h3 class="text-xl font-semibold mb-2">Rock Paper Scissors</h3>
+                <p class="text-gray-600 mb-3">Play against the computer using hand gestures</p>
+                <div class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full mb-3 inline-block">
+                    Ages 10-18 • Hand Coordination
+                </div>
+                <div class="text-xs text-gray-500 mb-4">Skills: Reaction time, Decision making</div>
+                <button onclick="startGame('rock-paper-scissors')" class="game-btn w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors opacity-50" disabled>
+                    Play Game
+                </button>
+            </div>
+            
+            <!-- Simon Says -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="text-4xl mb-4">👋</div>
+                <h3 class="text-xl font-semibold mb-2">Simon Says Gestures</h3>
+                <p class="text-gray-600 mb-3">Follow gesture commands in sequence</p>
+                <div class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full mb-3 inline-block">
+                    Ages 10-18 • Memory & Coordination
+                </div>
+                <div class="text-xs text-gray-500 mb-4">Skills: Memory, Attention, Control</div>
+                <button onclick="startGame('simon-says')" class="game-btn w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors opacity-50" disabled>
+                    Play Game
+                </button>
+            </div>
+            
+            <!-- Target Pointing -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="text-4xl mb-4">🎯</div>
+                <h3 class="text-xl font-semibold mb-2">Target Pointing</h3>
+                <p class="text-gray-600 mb-3">Point at targets that appear on screen</p>
+                <div class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full mb-3 inline-block">
+                    Ages 10-18 • Precision & Focus
+                </div>
+                <div class="text-xs text-gray-500 mb-4">Skills: Precision, Hand-eye coordination</div>
+                <button onclick="startGame('target-pointing')" class="game-btn w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors opacity-50" disabled>
+                    Play Game
+                </button>
+            </div>
+            
+            <!-- Mirror Match -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="text-4xl mb-4">🪞</div>
+                <h3 class="text-xl font-semibold mb-2">Mirror Match</h3>
+                <p class="text-gray-600 mb-3">Copy the movements shown on screen</p>
+                <div class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full mb-3 inline-block">
+                    Ages 12-18 • Body Awareness
+                </div>
+                <div class="text-xs text-gray-500 mb-4">Skills: Body awareness, Spatial processing</div>
+                <button onclick="startGame('mirror-match')" class="game-btn w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors opacity-50" disabled>
+                    Play Game
+                </button>
+            </div>
+            
+            <!-- Rhythm Clapping -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="text-4xl mb-4">👏</div>
+                <h3 class="text-xl font-semibold mb-2">Rhythm Clapping</h3>
+                <p class="text-gray-600 mb-3">Clap along to rhythmic patterns</p>
+                <div class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full mb-3 inline-block">
+                    Ages 10-16 • Timing & Rhythm
+                </div>
+                <div class="text-xs text-gray-500 mb-4">Skills: Timing, Motor planning</div>
+                <button onclick="startGame('rhythm-clap')" class="game-btn w-full bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 transition-colors opacity-50" disabled>
+                    Play Game
+                </button>
+            </div>
+            
+            <!-- Color Touch -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="text-4xl mb-4">🌈</div>
+                <h3 class="text-xl font-semibold mb-2">Color Touch</h3>
+                <p class="text-gray-600 mb-3">Touch the correct colored objects</p>
+                <div class="text-xs bg-pink-100 text-pink-800 px-2 py-1 rounded-full mb-3 inline-block">
+                    Ages 10-15 • Visual Processing
+                </div>
+                <div class="text-xs text-gray-500 mb-4">Skills: Visual tracking, Speed</div>
+                <button onclick="startGame('color-touch')" class="game-btn w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 transition-colors opacity-50" disabled>
+                    Play Game
+                </button>
+            </div>
+        </div>
+        
+        <!-- Game Area -->
+        <div id="gameArea" class="bg-white rounded-lg shadow-md p-6 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="gameTitle" class="text-2xl font-semibold text-gray-800">Game</h2>
+                <div class="flex space-x-4 text-sm">
+                    <div id="gameScore" class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-semibold">Score: 0</div>
+                    <div id="gameRound" class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full">Round: 1/5</div>
+                    <div id="gameTimer" class="bg-green-100 text-green-800 px-3 py-1 rounded-full">Time: 0s</div>
+                </div>
+            </div>
+            
+            <div id="gameContent" class="text-center py-8 min-h-[300px] flex flex-col justify-center">
+                <!-- Game content will be inserted here -->
+            </div>
+            
+            <div class="mt-6 text-center space-x-4">
+                <button id="nextRound" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors hidden">
+                    Next Round
+                </button>
+                <button id="pauseGame" class="bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition-colors">
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+                <button id="endGame" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                    <i class="fas fa-stop"></i> End Game
+                </button>
+            </div>
+        </div>
+        
+        <!-- Results Modal -->
+        <div id="resultsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-lg mx-4 transform transition-all">
+                <h2 class="text-2xl font-bold mb-4 text-center">🎉 Game Complete!</h2>
+                <div id="resultsContent" class="mb-6">
+                    <!-- Results will be inserted here -->
+                </div>
+                <div class="flex space-x-4 justify-center">
+                    <button onclick="playAgain()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-redo"></i> Play Again
+                    </button>
+                    <button onclick="closeResults()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instructions Modal -->
+        <div id="instructionsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-lg mx-4">
+                <h2 class="text-2xl font-bold mb-4 text-center">📋 How to Play</h2>
+                <div id="instructionsContent" class="mb-6 text-left">
+                    <!-- Instructions will be inserted here -->
+                </div>
+                <div class="flex justify-center">
+                    <button onclick="closeInstructions()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-check"></i> Got It!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class CoordinationGames {
+    constructor() {
+        this.videoElement = null;
+        this.canvasElement = null;
+        this.canvasCtx = null;
+        this.stream = null;
+        this.animationId = null;
+        
+        this.currentGame = null;
+        this.gameState = {
+            score: 0,
+            round: 1,
+            maxRounds: 5,
+            currentGesture: 'none',
+            isPlaying: false,
+            isPaused: false,
+            startTime: null,
+            gameTime: 0,
+            correctCount: 0,
+            totalAttempts: 0,
+            waitingForGesture: false,
+            targetGesture: null,
+            computerChoice: null,
+            roundStartTime: null
+        };
+        
+        this.gestureHistory = [];
+        this.lastGestureTime = 0;
+        this.handDetected = false;
+        this.detectionFrameRate = 0;
+        
+        this.initializeElements();
+        this.bindEvents();
+    }
+    
+    initializeElements() {
+        this.videoElement = document.getElementById('cameraFeed');
+        this.canvasElement = document.getElementById('poseCanvas');
+        this.canvasCtx = this.canvasElement.getContext('2d');
+        
+        // Set canvas size
+        this.canvasElement.width = 320;
+        this.canvasElement.height = 240;
+    }
+    
+    bindEvents() {
+        document.getElementById('startCamera').addEventListener('click', () => this.startCamera());
+        document.getElementById('stopCamera').addEventListener('click', () => this.stopCamera());
+        document.getElementById('endGame').addEventListener('click', () => this.endGame());
+        document.getElementById('nextRound').addEventListener('click', () => this.nextRound());
+        document.getElementById('pauseGame').addEventListener('click', () => this.togglePause());
+    }
+    
+    async startCamera() {
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    facingMode: 'user'
+                } 
+            });
+            
+            this.videoElement.srcObject = this.stream;
+            
+            await new Promise((resolve) => {
+                this.videoElement.onloadedmetadata = resolve;
+            });
+            
+            await this.videoElement.play();
+            this.startGestureDetection();
+            
+            // Update UI
+            document.getElementById('startCamera').disabled = true;
+            document.getElementById('stopCamera').disabled = false;
+            document.getElementById('cameraStatus').textContent = '✅ Camera active - Ready to play!';
+            document.getElementById('confidence').textContent = 'Detecting hands...';
+            
+            // Enable game buttons
+            document.querySelectorAll('.game-btn').forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            });
+            
+            this.showNotification('Camera started! Show your hands to begin detection.', 'success');
+            
+        } catch (error) {
+            console.error('Error starting camera:', error);
+            this.showNotification('Could not access camera. Please check permissions.', 'error');
+            document.getElementById('cameraStatus').textContent = '❌ Camera access denied';
+            document.getElementById('confidence').textContent = 'Error';
+        }
+    }
+    
+    stopCamera() {
+        if (this.stream) {
+            this.stream.getTracks().forEach(track => track.stop());
+            this.stream = null;
+        }
+        
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+        
+        this.videoElement.srcObject = null;
+        this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
+        
+        // Update UI
+        document.getElementById('startCamera').disabled = false;
+        document.getElementById('stopCamera').disabled = true;
+        document.getElementById('cameraStatus').textContent = 'Camera stopped';
+        document.getElementById('currentGesture').textContent = 'None detected';
+        document.getElementById('handDetection').textContent = 'Ready';
+        document.getElementById('confidence').textContent = 'Ready';
+        
+        // Disable game buttons
+        document.querySelectorAll('.game-btn').forEach(btn => {
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+        });
+        
+        this.endGame();
+        this.showNotification('Camera stopped', 'warning');
+    }
+    
+    startGestureDetection() {
+        let frameCount = 0;
+        const startTime = Date.now();
+        
+        const detectGestures = () => {
+            if (this.videoElement && this.videoElement.readyState === 4) {
+                frameCount++;
+                
+                // Calculate FPS every 30 frames
+                if (frameCount % 30 === 0) {
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    this.detectionFrameRate = Math.round(frameCount / elapsed);
+                }
+                
+                this.processVideoFrame();
+            }
+            
+            if (this.stream) {
+                this.animationId = requestAnimationFrame(detectGestures);
+            }
+        };
+        
+        detectGestures();
+    }
+    
+    async processVideoFrame() {
+        // Draw video frame to canvas
+        this.canvasCtx.drawImage(
+            this.videoElement, 
+            0, 0, 
+            this.canvasElement.width, 
+            this.canvasElement.height
+        );
+        
+        // Get frame data for backend processing
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = this.canvasElement.width;
+        canvas.height = this.canvasElement.height;
+        
+        ctx.drawImage(this.videoElement, 0, 0, canvas.width, canvas.height);
+        const frameData = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+        
+        // Send to backend for gesture detection
+        try {
+            const response = await fetch('/dyspraxia/detect-hand-gesture', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ frame: frameData })
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    this.handDetected = result.hand_detected;
+                    this.updateGestureDisplay(result.gesture);
+                    
+                    // Update canvas with processed frame showing green lines
+                    if (result.processed_frame) {
+                        const img = new Image();
+                        img.onload = () => {
+                            this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
+                            this.canvasCtx.drawImage(img, 0, 0, this.canvasElement.width, this.canvasElement.height);
+                            
+                            // Add detection info overlay
+                            this.drawDetectionOverlay(result.gesture, result.hand_detected);
+                        };
+                        img.src = 'data:image/jpeg;base64,' + result.processed_frame;
+                    }
+                    
+                    // Process game logic
+                    if (this.gameState.isPlaying && !this.gameState.isPaused) {
+                        this.updateGameTimer();
+                        if (result.gesture !== 'none') {
+                            this.processGameGesture(result.gesture);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error processing frame:', error);
+        }
+    }
+    
+    drawDetectionOverlay(gesture, handDetected) {
+        // Draw detection status
+        this.canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        this.canvasCtx.fillRect(5, 5, 200, 60);
+        
+        // Detection status
+        this.canvasCtx.fillStyle = handDetected ? '#10b981' : '#ef4444';
+        this.canvasCtx.font = 'bold 12px Arial';
+        this.canvasCtx.fillText(`Hand: ${handDetected ? 'Detected' : 'Not Found'}`, 10, 20);
+        
+        // Gesture status
+        this.canvasCtx.fillStyle = gesture !== 'none' ? '#10b981' : '#6b7280';
+        this.canvasCtx.fillText(`Gesture: ${this.getGestureDisplayName(gesture)}`, 10, 35);
+        
+        // FPS
+        this.canvasCtx.fillStyle = '#8b5cf6';
+        this.canvasCtx.font = '10px Arial';
+        this.canvasCtx.fillText(`FPS: ${this.detectionFrameRate}`, 10, 50);
+    }
+    
+    getGestureDisplayName(gesture) {
+        const names = {
+            'none': 'None',
+            'rock': 'Rock ✊',
+            'paper': 'Paper ✋',
+            'scissors': 'Scissors ✌️',
+            'point': 'Point 👉',
+            'thumbs_up': 'Thumbs Up 👍',
+            'wave': 'Wave 👋',
+            'open_palm': 'Open Palm ✋',
+            'clap': 'Clap 👏'
+        };
+        return names[gesture] || gesture;
+    }
+    
+    updateGestureDisplay(gesture) {
+        this.gameState.currentGesture = gesture;
+        document.getElementById('currentGesture').textContent = this.getGestureDisplayName(gesture);
+        document.getElementById('handDetection').textContent = this.handDetected ? '✅ Detected' : '❌ Not Found';
+        document.getElementById('confidence').textContent = `${this.detectionFrameRate} FPS`;
+    }
+    
+    updateGameTimer() {
+        if (this.gameState.startTime && !this.gameState.isPaused) {
+            this.gameState.gameTime = Math.floor((Date.now() - this.gameState.startTime) / 1000);
+            document.getElementById('gameTimer').textContent = `Time: ${this.gameState.gameTime}s`;
+        }
+    }
+    
+    togglePause() {
+        this.gameState.isPaused = !this.gameState.isPaused;
+        const pauseBtn = document.getElementById('pauseGame');
+        
+        if (this.gameState.isPaused) {
+            pauseBtn.innerHTML = '<i class="fas fa-play"></i> Resume';
+            pauseBtn.className = 'bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors';
+            this.showNotification('Game paused', 'warning');
+        } else {
+            pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+            pauseBtn.className = 'bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition-colors';
+            this.showNotification('Game resumed', 'success');
+        }
+    }
+    
+    processGameGesture(gesture) {
+        if (this.gameState.isPaused || !this.gameState.waitingForGesture) return;
+        
+        const now = Date.now();
+        
+        // Prevent rapid-fire detection
+        if (now - this.lastGestureTime < 1000) return;
+        this.lastGestureTime = now;
+        
+        switch (this.currentGame) {
+            case 'rock-paper-scissors':
+                this.processRockPaperScissors(gesture);
+                break;
+            case 'simon-says':
+                this.processSimonSays(gesture);
+                break;
+            case 'target-pointing':
+                this.processTargetPointing(gesture);
+                break;
+            case 'mirror-match':
+                this.processMirrorMatch(gesture);
+                break;
+            case 'rhythm-clap':
+                this.processRhythmClap(gesture);
+                break;
+            case 'color-touch':
+                this.processColorTouch(gesture);
+                break;
+        }
+    }
+    
+    processRockPaperScissors(gesture) {
+        if (['rock', 'paper', 'scissors'].includes(gesture)) {
+            this.gameState.waitingForGesture = false;
+            this.gameState.totalAttempts++;
+            
+            const computerChoices = ['rock', 'paper', 'scissors'];
+            const computerChoice = computerChoices[Math.floor(Math.random() * 3)];
+            this.gameState.computerChoice = computerChoice;
+            
+            const result = this.determineWinner(gesture, computerChoice);
+            
+            if (result === 'win') this.gameState.correctCount++;
+            
+            this.showRoundResult(result, { player: gesture, computer: computerChoice });
+        }
+    }
+    
+    processSimonSays(gesture) {
+        if (gesture === this.gameState.targetGesture) {
+            this.gameState.waitingForGesture = false;
+            this.gameState.totalAttempts++;
+            this.gameState.correctCount++;
+            this.showRoundResult('win', { target: this.gameState.targetGesture });
+        }
+    }
+    
+    processTargetPointing(gesture) {
+        if (gesture === 'point') {
+            this.gameState.waitingForGesture = false;
+            this.gameState.totalAttempts++;
+            this.gameState.correctCount++;
+            this.showRoundResult('win', { action: 'point' });
+        }
+    }
+    
+    processMirrorMatch(gesture) {
+        if (gesture === this.gameState.targetGesture) {
+            this.gameState.waitingForGesture = false;
+            this.gameState.totalAttempts++;
+            this.gameState.correctCount++;
+            this.showRoundResult('win', { mirrored: gesture });
+        }
+    }
+    
+    processRhythmClap(gesture) {
+        if (gesture === 'clap') {
+            this.gameState.waitingForGesture = false;
+            this.gameState.totalAttempts++;
+            
+            // Check timing
+            const timeDiff = Math.abs(Date.now() - this.gameState.expectedClapTime);
+            if (timeDiff < 800) { // Within 800ms
+                this.gameState.correctCount++;
+                this.showRoundResult('win', { timing: 'perfect' });
+            } else {
+                this.showRoundResult('lose', { timing: 'off' });
+            }
+        }
+    }
+    
+    processColorTouch(gesture) {
+        if (gesture === 'point') {
+            this.gameState.waitingForGesture = false;
+            this.gameState.totalAttempts++;
+            
+            // Simulate color accuracy (in real app, check pointing position)
+            const accuracy = Math.random();
+            if (accuracy > 0.25) { // 75% success rate
+                this.gameState.correctCount++;
+                this.showRoundResult('win', { color: this.gameState.targetColor });
+            } else {
+                this.showRoundResult('lose', { color: 'missed' });
+            }
+        }
+    }
+    
+    determineWinner(playerChoice, computerChoice) {
+        if (playerChoice === computerChoice) return 'tie';
+        
+        const winConditions = {
+            rock: 'scissors',
+            paper: 'rock',
+            scissors: 'paper'
+        };
+        
+        return winConditions[playerChoice] === computerChoice ? 'win' : 'lose';
+    }
+    
+    showRoundResult(result, data) {
+        const content = document.getElementById('gameContent');
+        let message, emoji, details = '';
+        
+        if (result === 'win') {
+            message = this.getSuccessMessage();
+            emoji = '🎉';
+            this.gameState.score++;
+            
+            if (this.currentGame === 'rock-paper-scissors') {
+                details = `You: ${data.player} vs Computer: ${data.computer}`;
+            }
+        } else if (result === 'lose') {
+            message = this.getEncouragementMessage();
+            emoji = '😊';
+            
+            if (this.currentGame === 'rock-paper-scissors') {
+                details = `You: ${data.player} vs Computer: ${data.computer}`;
+            }
+        } else {
+            message = 'It\'s a tie!';
+            emoji = '🤝';
+            details = `Both chose: ${data.player}`;
+        }
+        
+        content.innerHTML = `
+            <div class="animate-bounce text-6xl mb-4">${emoji}</div>
+            <div class="text-2xl font-bold mb-4 text-blue-600">${message}</div>
+            ${details ? `<div class="text-lg mb-4 text-gray-600">${details}</div>` : ''}
+            <div class="bg-gray-50 rounded-lg p-4 mx-auto max-w-md">
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="text-center">
+                        <div class="font-bold text-blue-600">${this.gameState.score}</div>
+                        <div class="text-gray-500">Score</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="font-bold text-green-600">${this.getAccuracy()}%</div>
+                        <div class="text-gray-500">Accuracy</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        this.updateGameDisplay();
+        
+        if (this.gameState.round < this.gameState.maxRounds) {
+            setTimeout(() => {
+                document.getElementById('nextRound').classList.remove('hidden');
+            }, 2000);
+        } else {
+            setTimeout(() => this.showFinalResults(), 3000);
+        }
+    }
+    
+    getSuccessMessage() {
+        const messages = [
+            'Awesome!', 'Perfect!', 'Great work!', 'Excellent!', 
+            'Fantastic!', 'Well done!', 'Amazing!', 'Brilliant!'
+        ];
+        return messages[Math.floor(Math.random() * messages.length)];
+    }
+    
+    getEncouragementMessage() {
+        const messages = [
+            'Good try!', 'Almost there!', 'Keep going!', 
+            'You\'ve got this!', 'Nice effort!', 'Keep practicing!'
+        ];
+        return messages[Math.floor(Math.random() * messages.length)];
+    }
+    
+    getAccuracy() {
+        if (this.gameState.totalAttempts === 0) return 0;
+        return Math.round((this.gameState.correctCount / this.gameState.totalAttempts) * 100);
+    }
+    
+    async saveGameResult() {
+        try {
+            const gameData = {
+                game_type: this.currentGame,
+                score: this.gameState.score,
+                total_rounds: this.gameState.maxRounds,
+                accuracy: this.getAccuracy(),
+                game_time: this.gameState.gameTime,
+                correct_attempts: this.gameState.correctCount,
+                total_attempts: this.gameState.totalAttempts,
+                difficulty: this.getDifficultyLevel()
+            };
+            
+            const response = await fetch('/dyspraxia/save-game-results', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(gameData)
+            });
+            
+            if (response.ok) {
+                console.log('Game results saved to games.csv');
+            } else {
+                console.error('Failed to save game results');
+            }
+            
+        } catch (error) {
+            console.error('Error saving game results:', error);
+        }
+    }
+    
+    getDifficultyLevel() {
+        const difficultyMap = {
+            'rock-paper-scissors': 'easy',
+            'simon-says': 'medium',
+            'target-pointing': 'medium',
+            'mirror-match': 'hard',
+            'rhythm-clap': 'medium',
+            'color-touch': 'easy'
+        };
+        return difficultyMap[this.currentGame] || 'medium';
+    }
+    
+    showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 transition-all duration-500 transform translate-x-0 ${
+            type === 'success' ? 'bg-green-500' : 
+            type === 'error' ? 'bg-red-500' : 
+            type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+        }`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>
+                ${message}
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => notification.classList.add('translate-x-0'), 100);
+        
+        // Animate out and remove
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 500);
+        }, 4000);
+    }
+    
+    showFinalResults() {
+        const modal = document.getElementById('resultsModal');
+        const content = document.getElementById('resultsContent');
+        
+        const accuracy = this.getAccuracy();
+        let performance, emoji, encouragement, badge;
+        
+        if (accuracy >= 90) {
+            performance = 'Outstanding!';
+            emoji = '🏆';
+            encouragement = 'You\'re a coordination champion!';
+            badge = 'Gold Medal';
+        } else if (accuracy >= 75) {
+            performance = 'Excellent!';
+            emoji = '🌟';
+            encouragement = 'Great coordination skills!';
+            badge = 'Star Player';
+        } else if (accuracy >= 60) {
+            performance = 'Good Job!';
+            emoji = '👍';
+            encouragement = 'You\'re improving nicely!';
+            badge = 'Good Progress';
+        } else if (accuracy >= 40) {
+            performance = 'Keep Practicing!';
+            emoji = '💪';
+            encouragement = 'Practice makes perfect!';
+            badge = 'Getting Better';
+        } else {
+            performance = 'Great Effort!';
+            emoji = '🌈';
+            encouragement = 'Every try helps you improve!';
+            badge = 'Keep Trying';
+        }
+        
+        content.innerHTML = `
+            <div class="text-center">
+                <div class="text-6xl mb-4 animate-pulse">${emoji}</div>
+                <div class="text-2xl font-bold mb-2 text-blue-600">${performance}</div>
+                <div class="text-lg mb-4 text-gray-700">${encouragement}</div>
+                
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 mb-4">
+                    <div class="text-lg font-bold mb-4 text-purple-600">${badge}</div>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="bg-white rounded-lg p-3">
+                            <div class="text-2xl font-bold text-blue-600">${this.gameState.score}</div>
+                            <div class="text-gray-500">Score</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <div class="text-2xl font-bold text-green-600">${accuracy}%</div>
+                            <div class="text-gray-500">Accuracy</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <div class="text-2xl font-bold text-purple-600">${this.gameState.gameTime}s</div>
+                            <div class="text-gray-500">Time</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <div class="text-2xl font-bold text-orange-600">${this.gameState.totalAttempts}</div>
+                            <div class="text-gray-500">Attempts</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-sm text-gray-600 bg-gray-50 rounded-lg p-4">
+                    <strong>💡 Tip:</strong> ${this.getPersonalizedFeedback(accuracy)}
+                </div>
+            </div>
+        `;
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // Save results to CSV
+        this.saveGameResult();
+    }
+    
+    getPersonalizedFeedback(accuracy) {
+        const feedbacks = {
+            90: [
+                'Your hand coordination is excellent! Try harder games for more challenge.',
+                'You\'re mastering these movements! Ready for advanced levels?',
+                'Amazing control! Your practice is really paying off.'
+            ],
+            75: [
+                'Great improvement! Your coordination skills are developing well.',
+                'Good progress! Keep practicing to build even stronger skills.',
+                'You\'re doing really well! Consistency is key to improvement.'
+            ],
+            60: [
+                'You\'re on the right track! Daily practice will help build your skills.',
+                'Nice effort! Focus on making clear, deliberate movements.',
+                'Keep going! Each game helps improve your coordination.'
+            ],
+            40: [
+                'Remember, everyone learns at their own pace. Celebrate small wins!',
+                'Practice makes progress! Try focusing on one gesture at a time.',
+                'You\'re improving! Don\'t worry about speed, focus on accuracy first.'
+            ],
+            0: [
+                'Every attempt helps you learn! Keep trying and have fun.',
+                'Take your time and focus on clear movements. You\'ve got this!',
+                'Learning takes time. Each game helps build your coordination skills.'
+            ]
+        };
+        
+        let category = 0;
+        if (accuracy >= 90) category = 90;
+        else if (accuracy >= 75) category = 75;
+        else if (accuracy >= 60) category = 60;
+        else if (accuracy >= 40) category = 40;
+        
+        const options = feedbacks[category];
+        return options[Math.floor(Math.random() * options.length)];
+    }
+    
+    showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 transition-all duration-500 transform translate-x-full ${
+            type === 'success' ? 'bg-green-500' : 
+            type === 'error' ? 'bg-red-500' : 
+            type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+        }`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>
+                ${message}
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+        
+        // Animate out and remove
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 500);
+        }, 4000);
+    }
+}
+
+// Game control functions
+let gameInstance;
+
+function startGame(gameType) {
+    if (!gameInstance) {
+        gameInstance = new CoordinationGames();
+    }
+    
+    if (!gameInstance.stream) {
+        gameInstance.showNotification('Please start camera first! 📹', 'warning');
+        return;
+    }
+    
+    showGameInstructions(gameType);
+}
+
+function showGameInstructions(gameType) {
+    const modal = document.getElementById('instructionsModal');
+    const content = document.getElementById('instructionsContent');
+    
+    const instructions = {
+        'rock-paper-scissors': {
+            title: '✂️ Rock Paper Scissors',
+            steps: [
+                '🤜 Make a <strong>fist</strong> for ROCK',
+                '✋ Open your hand <strong>flat</strong> for PAPER', 
+                '✌️ Make a <strong>peace sign</strong> for SCISSORS',
+                '📹 Show your gesture clearly to the camera',
+                '🎯 Try to beat the computer!'
+            ],
+            tip: '💡 <strong>Tip:</strong> Hold your gesture steady for 2 seconds so the camera can detect it properly.'
+        },
+        'simon-says': {
+            title: '👋 Simon Says Gestures',
+            steps: [
+                '👀 Watch the gesture shown on screen',
+                '🪞 Copy the exact same gesture',
+                '⏱️ Hold it steady until detected',
+                '⏳ Wait for the next command',
+                '🎯 Remember: Only do it when Simon says!'
+            ],
+            tip: '💡 <strong>Tip:</strong> Take your time and focus on making clear, precise gestures.'
+        },
+        'target-pointing': {
+            title: '🎯 Target Pointing',
+            steps: [
+                '🔴 Red targets will appear on screen',
+                '👉 Point your finger at each target',
+                '📏 Make sure your pointing is clear and direct',
+                '⚡ Try to be quick but accurate',
+                '⭐ Score points for each successful hit!'
+            ],
+            tip: '💡 <strong>Tip:</strong> Keep your arm steady and point directly at the center of targets.'
+        },
+        'mirror-match': {
+            title: '🪞 Mirror Match',
+            steps: [
+                '👁️ A movement will be demonstrated',
+                '🪞 Copy the movement exactly like a mirror',
+                '🎯 Match the position precisely',
+                '✅ Hold until the system confirms',
+                '🔄 Progress through all movements'
+            ],
+            tip: '💡 <strong>Tip:</strong> Think about body awareness and mirror movements precisely.'
+        },
+        'rhythm-clap': {
+            title: '👏 Rhythm Clapping',
+            steps: [
+                '🎵 Listen to the rhythm pattern',
+                '👏 Clap along with the beat',
+                '⏰ Keep the same timing',
+                '🚫 Don\'t rush or lag behind',
+                '🎶 Complete the full pattern'
+            ],
+            tip: '💡 <strong>Tip:</strong> Count the beats in your head to stay on rhythm.'
+        },
+        'color-touch': {
+            title: '🌈 Color Touch',
+            steps: [
+                '🎨 Colored shapes will appear',
+                '👉 Point to the correct color quickly',
+                '🎯 Be accurate with your pointing',
+                '⚡ Speed and precision both matter',
+                '🏆 Collect points for correct touches'
+            ],
+            tip: '💡 <strong>Tip:</strong> Focus on the color called out and point confidently.'
+        }
+    };
+    
+    const gameInstructions = instructions[gameType];
+    
+    content.innerHTML = `
+        <div class="text-center mb-6">
+            <h3 class="text-xl font-bold text-blue-600 mb-4">${gameInstructions.title}</h3>
+        </div>
+        <div class="space-y-3 mb-6">
+            ${gameInstructions.steps.map(step => `
+                <div class="flex items-start space-x-2">
+                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    </div>
+                    <div class="text-gray-700">${step}</div>
+                </div>
+            `).join('')}
+        </div>
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <p class="text-sm text-yellow-800">${gameInstructions.tip}</p>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeInstructions() {
+    const modal = document.getElementById('instructionsModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    
+    // Actually start the game now
+    gameInstance.currentGame = modal.dataset.gameType;
+    actuallyStartGame(modal.dataset.gameType);
+}
+
+function actuallyStartGame(gameType) {
+    gameInstance.currentGame = gameType;
+    gameInstance.gameState = { 
+        score: 0, 
+        round: 1, 
+        maxRounds: gameType === 'target-pointing' ? 10 : gameType === 'rhythm-clap' ? 8 : 5,
+        currentGesture: 'none',
+        isPlaying: true,
+        isPaused: false,
+        startTime: Date.now(),
+        gameTime: 0,
+        correctCount: 0,
+        totalAttempts: 0,
+        waitingForGesture: false
+    };
+    
+    document.getElementById('gameArea').classList.remove('hidden');
+    document.getElementById('gameTitle').textContent = getGameTitle(gameType);
+    document.getElementById('instructionsModal').dataset.gameType = gameType;
+    
+    updateGameDisplay();
+    startGameRound(gameType);
+    
+    gameInstance.showNotification(`Starting ${getGameTitle(gameType)}! 🎮`, 'success');
+}
+
+function getGameTitle(gameType) {
+    const titles = {
+        'rock-paper-scissors': 'Rock Paper Scissors',
+        'simon-says': 'Simon Says Gestures',
+        'target-pointing': 'Target Pointing',
+        'mirror-match': 'Mirror Match',
+        'rhythm-clap': 'Rhythm Clapping',
+        'color-touch': 'Color Touch'
+    };
+    return titles[gameType] || 'Game';
+}
+
+function startGameRound(gameType) {
+    const content = document.getElementById('gameContent');
+    
+    if (gameType === 'rock-paper-scissors') {
+        content.innerHTML = `
+            <div class="text-2xl font-bold mb-6 text-blue-600">Round ${gameInstance.gameState.round}</div>
+            <div class="text-lg mb-6">Make your gesture: Rock, Paper, or Scissors</div>
+            <div class="flex justify-center space-x-8 mb-6">
+                <div class="text-center">
+                    <div class="text-4xl mb-2">🤜</div>
+                    <div class="text-sm">Rock</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl mb-2">✋</div>
+                    <div class="text-sm">Paper</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl mb-2">✌️</div>
+                    <div class="text-sm">Scissors</div>
+                </div>
+            </div>
+            <div class="text-lg text-green-600 font-semibold">Show your gesture to the camera!</div>
+            <div class="mt-4 text-sm text-gray-500">The green lines will track your hand movement</div>
+        `;
+        
+        gameInstance.gameState.waitingForGesture = true;
+        
+    } else if (gameType === 'simon-says') {
+        const gestures = ['thumbs_up', 'point', 'rock', 'paper', 'wave'];
+        const targetGesture = gestures[Math.floor(Math.random() * gestures.length)];
+        gameInstance.gameState.targetGesture = targetGesture;
+        
+        const gestureEmojis = {
+            'thumbs_up': '👍',
+            'point': '👉',
+            'rock': '✊',
+            'paper': '✋',
+            'wave': '👋'
+        };
+        
+        const gestureNames = {
+            'thumbs_up': 'Thumbs Up',
+            'point': 'Point',
+            'rock': 'Rock',
+            'paper': 'Paper',
+            'wave': 'Wave'
+        };
+        
+        content.innerHTML = `
+            <div class="text-2xl font-bold mb-6 text-green-600">Round ${gameInstance.gameState.round}</div>
+            <div class="text-xl mb-4">Simon Says:</div>
+            <div class="text-lg mb-6 font-semibold">Make this gesture</div>
+            <div class="text-8xl mb-4 animate-pulse">${gestureEmojis[targetGesture]}</div>
+            <div class="text-2xl font-bold text-blue-600 mb-4">${gestureNames[targetGesture]}</div>
+            <div class="text-lg text-green-600">Show the gesture to the camera!</div>
+            <div class="mt-4 text-sm text-gray-500">Green lines will confirm your gesture</div>
+        `;
+        
+        gameInstance.gameState.waitingForGesture = true;
+        
+        // Auto-timeout after 10 seconds
+        setTimeout(() => {
+            if (gameInstance.gameState.waitingForGesture) {
+                gameInstance.gameState.waitingForGesture = false;
+                gameInstance.gameState.totalAttempts++;
+                showRoundResult('lose', { target: targetGesture });
+            }
+        }, 10000);
+        
+    } else if (gameType === 'target-pointing') {
+        content.innerHTML = `
+            <div class="text-2xl font-bold mb-6 text-purple-600">Round ${gameInstance.gameState.round}</div>
+            <div class="text-lg mb-6">Point at the red target when it appears</div>
+            <div class="relative w-full h-64 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg mx-auto max-w-lg border-2 border-purple-200" id="targetArea">
+                <div class="absolute w-12 h-12 bg-red-500 rounded-full shadow-lg border-4 border-white animate-pulse" id="target" style="display: none;">
+                    <div class="absolute inset-2 bg-red-400 rounded-full"></div>
+                </div>
+            </div>
+            <div class="text-lg mt-4 text-green-600">Get ready to point! 👉</div>
+            <div class="text-sm text-gray-500 mt-2">Use your pointing finger clearly</div>
+        `;
+        
+        setTimeout(() => {
+            const target = document.getElementById('target');
+            const area = document.getElementById('targetArea');
+            if (target && area) {
+                const x = Math.random() * (area.offsetWidth - 48);
+                const y = Math.random() * (area.offsetHeight - 48);
+                
+                target.style.left = x + 'px';
+                target.style.top = y + 'px';
+                target.style.display = 'block';
+                
+                gameInstance.gameState.waitingForGesture = true;
+                
+                // Auto-timeout after 5 seconds
+                setTimeout(() => {
+                    if (gameInstance.gameState.waitingForGesture) {
+                        gameInstance.gameState.waitingForGesture = false;
+                        gameInstance.gameState.totalAttempts++;
+                        showRoundResult('lose', { action: 'point' });
+                    }
+                }, 5000);
+            }
+        }, 2000);
+        
+    } else if (gameType === 'mirror-match') {
+        const movements = ['wave', 'thumbs_up', 'point', 'paper', 'rock'];
+        const targetMovement = movements[Math.floor(Math.random() * movements.length)];
+        gameInstance.gameState.targetGesture = targetMovement;
+        
+        const movementEmojis = {
+            'wave': '👋',
+            'thumbs_up': '👍',
+            'point': '👉',
+            'paper': '✋',
+            'rock': '✊'
+        };
+        
+        content.innerHTML = `
+            <div class="text-2xl font-bold mb-6 text-indigo-600">Round ${gameInstance.gameState.round}</div>
+            <div class="text-lg mb-4">Mirror this movement:</div>
+            <div class="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg p-8 mb-6">
+                <div class="text-8xl mb-4">${movementEmojis[targetMovement]}</div>
+                <div class="text-2xl font-bold text-indigo-600">${targetMovement.replace('_', ' ').toUpperCase()}</div>
+            </div>
+            <div class="text-lg text-green-600">Copy this movement exactly!</div>
+            <div class="text-sm text-gray-500 mt-2">The green tracking will confirm when you match it</div>
+        `;
+        
+        gameInstance.gameState.waitingForGesture = true;
+        
+        setTimeout(() => {
+            if (gameInstance.gameState.waitingForGesture) {
+                gameInstance.gameState.waitingForGesture = false;
+                gameInstance.gameState.totalAttempts++;
+                showRoundResult('lose', { target: targetMovement });
+            }
+        }, 8000);
+        
+    } else if (gameType === 'rhythm-clap') {
+        const patterns = [
+            { beats: [500, 500, 1000], name: 'Simple' },
+            { beats: [300, 300, 300, 600], name: 'Quick' },
+            { beats: [800, 400, 400, 800], name: 'Varied' }
+        ];
+        const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+        gameInstance.gameState.clapPattern = pattern;
+        
+        content.innerHTML = `
+            <div class="text-2xl font-bold mb-6 text-yellow-600">Round ${gameInstance.gameState.round}</div>
+            <div class="text-lg mb-6">Listen and clap along with the rhythm</div>
+            <div class="text-6xl mb-6" id="rhythmIndicator">🎵</div>
+            <div class="text-xl font-bold mb-4" id="patternName">${pattern.name} Pattern</div>
+            <div class="text-lg text-green-600">Clap when you see the hands! 👏</div>
+            <div class="text-sm text-gray-500 mt-2">Follow the rhythm exactly</div>
+        `;
+        
+        // Play rhythm pattern
+        this.playRhythmPattern(pattern);
+        
+    } else if (gameType === 'color-touch') {
+        const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+        const targetColor = colors[Math.floor(Math.random() * colors.length)];
+        gameInstance.gameState.targetColor = targetColor;
+        
+        const colorClasses = {
+            'red': 'bg-red-500',
+            'blue': 'bg-blue-500', 
+            'green': 'bg-green-500',
+            'yellow': 'bg-yellow-500',
+            'purple': 'bg-purple-500',
+            'orange': 'bg-orange-500'
+        };
+        
+        // Create multiple colored circles
+        let circles = '';
+        for (let i = 0; i < 6; i++) {
+            const color = colors[i];
+            const isTarget = color === targetColor;
+            const x = (i % 3) * 120 + 60;
+            const y = Math.floor(i / 3) * 100 + 50;
+            
+            circles += `
+                <div class="absolute w-16 h-16 ${colorClasses[color]} rounded-full shadow-lg border-4 border-white ${isTarget ? 'animate-pulse' : ''}" 
+                     style="left: ${x}px; top: ${y}px;">
+                </div>
+            `;
+        }
+        
+        content.innerHTML = `
+            <div class="text-2xl font-bold mb-6 text-pink-600">Round ${gameInstance.gameState.round}</div>
+            <div class="text-lg mb-4">Point to the <strong class="text-${targetColor}-600">${targetColor.toUpperCase()}</strong> circle</div>
+            <div class="relative w-full h-48 bg-gray-100 rounded-lg mx-auto max-w-md border-2" id="colorArea">
+                ${circles}
+            </div>
+            <div class="text-lg mt-4 text-green-600">Point at the ${targetColor} circle! 👉</div>
+            <div class="text-sm text-gray-500 mt-2">Be quick and accurate</div>
+        `;
+        
+        gameInstance.gameState.waitingForGesture = true;
+        
+        setTimeout(() => {
+            if (gameInstance.gameState.waitingForGesture) {
+                gameInstance.gameState.waitingForGesture = false;
+                gameInstance.gameState.totalAttempts++;
+                showRoundResult('lose', { color: targetColor });
+            }
+        }, 7000);
+    }
+}
+
+function playRhythmPattern(pattern) {
+    let currentBeat = 0;
+    const indicator = document.getElementById('rhythmIndicator');
+    
+    function playBeat() {
+        if (currentBeat < pattern.beats.length) {
+            // Visual cue
+            indicator.textContent = '👏';
+            indicator.className = 'text-6xl mb-6 animate-bounce';
+            
+            // Set expected clap time
+            gameInstance.gameState.expectedClapTime = Date.now() + 200; // 200ms window
+            gameInstance.gameState.waitingForGesture = true;
+            
+            setTimeout(() => {
+                indicator.textContent = '🎵';
+                indicator.className = 'text-6xl mb-6';
+                gameInstance.gameState.waitingForGesture = false;
+                
+                currentBeat++;
+                if (currentBeat < pattern.beats.length) {
+                    setTimeout(playBeat, pattern.beats[currentBeat - 1]);
+                } else {
+                    // Pattern complete
+                    setTimeout(() => {
+                        if (gameInstance.gameState.correctCount === 0) {
+                            gameInstance.gameState.totalAttempts++;
+                            showRoundResult('lose', { timing: 'missed' });
+                        }
+                    }, 1000);
+                }
+            }, 500);
+        }
+    }
+    
+    setTimeout(playBeat, 1000);
+}
+
+function showRoundResult(result, data) {
+    gameInstance.showRoundResult(result, data);
+}
+
+function nextRound() {
+    gameInstance.gameState.round++;
+    document.getElementById('nextRound').classList.add('hidden');
+    startGameRound(gameInstance.currentGame);
+}
+
+function updateGameDisplay() {
+    document.getElementById('gameScore').textContent = `Score: ${gameInstance.gameState.score}`;
+    document.getElementById('gameRound').textContent = `Round: ${gameInstance.gameState.round}/${gameInstance.gameState.maxRounds}`;
+}
+
+function playAgain() {
+    closeResults();
+    actuallyStartGame(gameInstance.currentGame);
+}
+
+function closeResults() {
+    const modal = document.getElementById('resultsModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function endGame() {
+    if (gameInstance) {
+        gameInstance.gameState.isPlaying = false;
+        gameInstance.currentGame = null;
+    }
+    document.getElementById('gameArea').classList.add('hidden');
+    gameInstance.showNotification('Game ended. Thanks for playing! 👋', 'warning');
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    gameInstance = new CoordinationGames();
+    
+    // Initially disable game buttons
+    document.querySelectorAll('.game-btn').forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('opacity-50');
+    });
+    
+    // Add click handlers for game instructions
+    document.addEventListener('click', (e) => {
+        if (e.target.onclick && e.target.onclick.toString().includes('startGame')) {
+            const gameType = e.target.onclick.toString().match(/startGame\('([^']+)'\)/)[1];
+            document.getElementById('instructionsModal').dataset.gameType = gameType;
+        }
+    });
+});
+</script>
+{% endblock %}

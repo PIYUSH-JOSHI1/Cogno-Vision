@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Learning Support Platform{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 2rem auto;">
+    <div class="card">
+        <div class="card-header" style="text-align: center;">
+            <h2 class="card-title">Create Your Account</h2>
+            <p style="color: #64748b;">Join our learning support community</p>
+        </div>
+        
+        <form method="POST" id="registerForm">
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Age</label>
+                <input type="number" name="age" class="form-input" min="5" max="100">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Register as</label>
+                <select name="role" class="form-input">
+                    <option value="patient">Patient</option>
+                    <option value="doctor">Doctor</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Learning Support Needed (Select all that apply)</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" name="conditions" value="dyslexia" style="margin-right: 0.5rem;">
+                        Dyslexia
+                    </label>
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" name="conditions" value="dyscalculia" style="margin-right: 0.5rem;">
+                        Dyscalculia
+                    </label>
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" name="conditions" value="dysgraphia" style="margin-right: 0.5rem;">
+                        Dysgraphia
+                    </label>
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" name="conditions" value="dyspraxia" style="margin-right: 0.5rem;">
+                        Dyspraxia
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                Create Account
+            </button>
+        </form>
+        
+        <div style="text-align: center;">
+            <p style="color: #64748b;">Already have an account? <a href="/auth/login" style="color: #3b82f6;">Login here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

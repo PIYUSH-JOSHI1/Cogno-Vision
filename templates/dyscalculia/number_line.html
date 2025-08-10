@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Number Line - Dyscalculia Support{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">📏 Interactive Number Line</h1>
+        
+        <!-- Number Line Controls -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Range Start</label>
+                    <input type="number" id="rangeStart" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Range End</label>
+                    <input type="number" id="rangeEnd" value="20" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Step Size</label>
+                    <select id="stepSize" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="text-center mb-4">
+                <button onclick="generateNumberLine()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                    Generate Number Line
+                </button>
+                <button onclick="startNumberLineGame()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 ml-4">
+                    Start Game
+                </button>
+            </div>
+        </div>
+        
+        <!-- Number Line Display -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div id="numberLineContainer" class="overflow-x-auto">
+                <svg id="numberLineSvg" width="800" height="150" class="w-full">
+                    <!-- Number line will be drawn here -->
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Game Area -->
+        <div id="gameArea" class="bg-white rounded-lg shadow-md p-6 hidden">
+            <h2 class="text-2xl font-semibold mb-4">Number Line Game</h2>
+            <div id="gameQuestion" class="text-lg mb-4"></div>
+            <div id="gameOptions" class="grid grid-cols-4 gap-4 mb-4"></div>
+            <div id="gameScore" class="text-lg font-semibold">Score: 0/0</div>
+        </div>
+        
+        <!-- Activities -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-4">🎯 Number Placement</h3>
+                <p class="text-gray-600 mb-4">Click on the number line where you think the number belongs</p>
+                <div id="placementQuestion" class="text-lg font-semibold mb-4">Place the number: <span id="targetNumber">15</span></div>
+                <button onclick="startPlacementGame()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                    Start Activity
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-4">🔢 Number Sequence</h3>
+                <p class="text-gray-600 mb-4">Fill in the missing numbers in the sequence</p>
+                <div id="sequenceQuestion" class="text-lg mb-4"></div>
+                <button onclick="startSequenceGame()" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">
+                    Start Activity
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class NumberLineGame {
+    constructor() {
+        this.currentGame = null;
+        this.score = 0;
+        this.totalQuestions = 0;
+        this.currentQuestion = 0;
+        this.questions = [];
+        
+        this.generateNumberLine();
+    }
+    
+    generateNumberLine() {
+        const start = parseInt(document.getElementById('rangeStart').value);
+        const end = parseInt(document.getElementById('rangeEnd').value);
+        const step = parseInt(document.getElementById('stepSize').value);
+        
+        const svg = document.getElementById('numberLineSvg');
+        svg.innerHTML = '';
+        
+        const width = 800;
+        const height = 150;
+        const margin = 50;
+        const lineY = height / 2;
+        
+        // Draw main line
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', margin);
+        line.setAttribute('y1', lineY);
+        line.setAttribute('x2', width - margin);
+        line.setAttribute('y2', lineY);
+        line.setAttribute('stroke', '#374151');
+        line.setAttribute('stroke-width', '3');
+        svg.appendChild(line);
+        
+        // Draw numbers and marks
+        const range = end - start;
+        const stepCount = range / step;
+        const stepWidth = (width - 2 * margin) / stepCount;
+        
+        for (let i = 0; i <= stepCount; i++) {
+            const number = start + (i * step);
+            const x = margin + (i * stepWidth);
+            
+            // Draw tick mark
+            const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            tick.setAttribute('x1', x);
+            tick.setAttribute('y1', lineY - 10);
+            tick.setAttribute('x2', x);
+            tick.setAttribute('y2', lineY + 10);
+            tick.setAttribute('stroke', '#374151');
+            tick.setAttribute('stroke-width', '2');
+            svg.appendChild(tick);
+            
+            // Draw number
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', x);
+            text.setAttribute('y', lineY + 30);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('font-family', 'Arial, sans-serif');
+            text.setAttribute('font-size', '14');
+            text.setAttribute('fill', '#374151');
+            text.textContent = number;
+            svg.appendChild(text);
+        }
+    }
+    
+    startNumberLineGame() {
+        this.currentGame = 'number-line';
+        this.score = 0;
+        this.currentQuestion = 0;
+        this.totalQuestions = 10;
+        this.generateQuestions();
+        
+        document.getElementById('gameArea').classList.remove('hidden');
+        this.showNextQuestion();
+    }
+    
+    generateQuestions() {
+        const start = parseInt(document.getElementById('rangeStart').value);
+        const end = parseInt(document.getElementById('rangeEnd').value);
+        
+        this.questions = [];
+        
+        for (let i = 0; i < this.totalQuestions; i++) {
+            const targetNumber = Math.floor(Math.random() * (end - start + 1)) + start;
+            const correctAnswer = targetNumber;
+            
+            // Generate wrong answers
+            const options = [correctAnswer];
+            while (options.length < 4) {
+                const wrongAnswer = Math.floor(Math.random() * (end - start + 1)) + start;
+                if (!options.includes(wrongAnswer)) {
+                    options.push(wrongAnswer);
+                }
+            }
+            
+            // Shuffle options
+            for (let j = options.length - 1; j > 0; j--) {
+                const k = Math.floor(Math.random() * (j + 1));
+                [options[j], options[k]] = [options[k], options[j]];
+            }
+            
+            this.questions.push({
+                question: `Which number comes next in the sequence: ${targetNumber - 2}, ${targetNumber - 1}, ?`,
+                options: options,
+                correct: correctAnswer
+            });
+        }
+    }
+    
+    showNextQuestion() {
+        if (this.currentQuestion >= this.totalQuestions) {
+            this.showResults();
+            return;
+        }
+        
+        const question = this.questions[this.currentQuestion];
+        document.getElementById('gameQuestion').textContent = question.question;
+        
+        const optionsContainer = document.getElementById('gameOptions');
+        optionsContainer.innerHTML = '';
+        
+        question.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'bg-gray-100 hover:bg-blue-100 border border-gray-300 rounded-lg p-4 text-lg font-semibold transition-colors';
+            button.textContent = option;
+            button.onclick = () => this.checkAnswer(option, question.correct);
+            optionsContainer.appendChild(button);
+        });
+        
+        this.updateScore();
+    }
+    
+    checkAnswer(selected, correct) {
+        if (selected === correct) {
+            this.score++;
+        }
+        
+        this.currentQuestion++;
+        setTimeout(() => this.showNextQuestion(), 1000);
+    }
+    
+    updateScore() {
+        document.getElementById('gameScore').textContent = `Score: ${this.score}/${this.currentQuestion}`;
+    }
+    
+    showResults() {
+        const percentage = Math.round((this.score / this.totalQuestions) * 100);
+        const gameArea = document.getElementById('gameArea');
+        
+        gameArea.innerHTML = `
+            <div class="text-center py-8">
+                <h2 class="text-3xl font-bold mb-4">Game Complete!</h2>
+                <div class="text-6xl mb-4">${percentage >= 80 ? '🎉' : percentage >= 60 ? '👍' : '💪'}</div>
+                <div class="text-2xl mb-4">Final Score: ${this.score}/${this.totalQuestions}</div>
+                <div class="text-xl mb-6">Accuracy: ${percentage}%</div>
+                <button onclick="location.reload()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                    Play Again
+                </button>
+            </div>
+        `;
+        
+        // Save progress
+        this.saveProgress();
+    }
+    
+    async saveProgress() {
+        try {
+            await fetch('/dyscalculia/save-progress', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    activity: 'number_line_game',
+                    score: this.score,
+                    total: this.totalQuestions,
+                    accuracy: (this.score / this.totalQuestions) * 100
+                })
+            });
+        } catch (error) {
+            console.error('Error saving progress:', error);
+        }
+    }
+}
+
+function startPlacementGame() {
+    alert('Number placement game will be implemented in the next update!');
+}
+
+function startSequenceGame() {
+    alert('Number sequence game will be implemented in the next update!');
+}
+
+// Initialize when page loads
+let numberLineGame;
+document.addEventListener('DOMContentLoaded', () => {
+    numberLineGame = new NumberLineGame();
+});
+</script>
+{% endblock %}

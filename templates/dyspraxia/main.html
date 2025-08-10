@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Dyspraxia Support - Learning Platform{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">🏃 Dyspraxia Support Center</h1>
+        <p style="color: #64748b;">Tools and activities to improve motor skills, balance, and coordination</p>
+    </div>
+</div>
+
+<div class="grid grid-3">
+    <div class="card dyspraxia-bg">
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-balance-scale dyspraxia-color" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 1rem;">Balance Training</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">Exercises to improve balance and stability</p>
+            <a href="/dyspraxia/balance-training" class="btn btn-danger" style="width: 100%;">Start Training</a>
+        </div>
+    </div>
+    
+    <div class="card dyspraxia-bg">
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-gamepad dyspraxia-color" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 1rem;">Coordination Games</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">Interactive games for motor coordination</p>
+            <a href="/dyspraxia/coordination-games" class="btn btn-danger" style="width: 100%;">Play Games</a>
+        </div>
+    </div>
+    
+    <div class="card dyspraxia-bg">
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-video dyspraxia-color" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 1rem;">Camera Exercises</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">Live camera-based movement tracking</p>
+            <a href="/dyspraxia/camera-exercises" class="btn btn-danger" style="width: 100%;">Use Camera</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">About Dyspraxia Support</h3>
+    </div>
+    
+    <div class="grid grid-2">
+        <div>
+            <h4 style="margin-bottom: 1rem; color: #ef4444;">What is Dyspraxia?</h4>
+            <p style="color: #64748b; line-height: 1.8; margin-bottom: 1.5rem;">
+                Dyspraxia is a developmental coordination disorder that affects movement and coordination. 
+                Our platform provides interactive exercises and games to help improve motor skills, 
+                balance, and coordination through structured practice and real-time feedback.
+            </p>
+            
+            <h4 style="margin-bottom: 1rem; color: #ef4444;">How We Help</h4>
+            <ul style="color: #64748b; line-height: 1.8;">
+                <li>Balance and stability exercises</li>
+                <li>Coordination training games</li>
+                <li>Live camera movement tracking</li>
+                <li>Progress monitoring and feedback</li>
+                <li>Adaptive difficulty levels</li>
+            </ul>
+        </div>
+        
+        <div>
+            <h4 style="margin-bottom: 1rem; color: #ef4444;">Features Available</h4>
+            <div style="display: grid; gap: 1rem;">
+                <div style="padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #ef4444;">
+                    <strong>Balance Training</strong>
+                    <p style="color: #64748b; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                        Guided balance exercises with timer and stability tracking
+                    </p>
+                </div>
+                
+                <div style="padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #ef4444;">
+                    <strong>Movement Games</strong>
+                    <p style="color: #64748b; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                        Interactive coordination games and movement sequences
+                    </p>
+                </div>
+                
+                <div style="padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #ef4444;">
+                    <strong>Camera Tracking</strong>
+                    <p style="color: #64748b; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                        Real-time movement analysis using computer vision
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

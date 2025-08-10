@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Doctor Dashboard</h2>
+<div class="max-w-7xl mx-auto mt-10 px-4">
+    <!-- Dashboard Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div>
+            <h2 class="text-3xl font-bold text-dyslexia-blue flex items-center gap-2">
+                <i class="fa-solid fa-user-doctor text-dyslexia-green"></i>
+                Doctor Dashboard
+            </h2>
+            <p class="text-gray-500 mt-1">Dynamic overview of all patients and their progress</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <span class="inline-block bg-dyslexia-green text-white px-4 py-2 rounded-lg font-semibold shadow">
+                Total Patients: {{ patients|length }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Dynamic Patient Sections -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {% for p in patients %}
+            <div class="card bg-white shadow-lg rounded-lg p-6 border border-dyslexia-blue/20 mb-8">
+                <div class="flex items-center mb-2">
+                    <i class="fa-solid fa-user text-dyslexia-blue mr-2"></i>
+                    <h3 class="text-xl font-semibold">{{ p.username }} <span class="text-sm text-gray-400">({{ p.email }})</span></h3>
+                </div>
+                <div class="mb-2 text-gray-500">Age: {{ p.age }} | Conditions: {{ p.conditions }}</div>
+                <div class="mb-4">
+                    <a href="{{ url_for('doctor.view_patient', patient_id=p.id) }}" class="btn btn-primary btn-sm">View Full Report</a>
+                </div>
+                <canvas id="chart-{{ p.id }}" height="180"></canvas>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Prepare patient progress data for charts
+const patientProgress = JSON.parse('{{ all_progress|tojson|safe }}');
+const patientMap = {};
+{% for p in patients %}
+    patientMap["{{ p.id }}"] = { username: "{{ p.username }}" };
+{% endfor %}
+const progressByPatient = {};
+Object.keys(patientMap).forEach(pid => progressByPatient[pid] = []);
+patientProgress.forEach(row => {
+    if (row.user_id && progressByPatient[row.user_id]) {
+        progressByPatient[row.user_id].push({
+            exercise: row.exercise_name,
+            score: parseFloat(row.stability_score || '0'),
+            duration: parseFloat(row.duration || '0'),
+            timestamp: row.timestamp
+        });
+    }
+});
+// Render charts for each patient
+document.addEventListener('DOMContentLoaded', function() {
+    Object.keys(progressByPatient).forEach(function(pid) {
+        const data = progressByPatient[pid];
+        if (!data.length) return;
+        const ctx = document.getElementById('chart-' + pid);
+        if (!ctx) return;
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(d => d.exercise + ' (' + d.timestamp.split('T')[0] + ')'),
+                datasets: [
+                    {
+                        label: 'Stability Score',
+                        data: data.map(d => d.score),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59,130,246,0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Duration (s)',
+                        data: data.map(d => d.duration),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16,185,129,0.1)',
+                        tension: 0.3,
+                        fill: false,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Progress Over Time' }
+                },
+                scales: {
+                    y: { title: { display: true, text: 'Stability Score' } },
+                    y1: {
+                        position: 'right',
+                        title: { display: true, text: 'Duration (s)' },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

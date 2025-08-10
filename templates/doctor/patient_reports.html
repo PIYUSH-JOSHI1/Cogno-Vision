@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-7xl mx-auto mt-10 px-4">
+  <div class="card bg-white shadow-lg rounded-lg p-8 border border-dyslexia-green/20">
+    <div class="flex items-center mb-6">
+      <i class="fa-solid fa-file-medical text-3xl text-dyslexia-green mr-3"></i>
+      <h2 class="text-2xl font-bold text-dyslexia-green">All Patient Reports</h2>
+    </div>
+    {% if all_progress and all_progress|length > 0 %}
+      <div class="mb-4">
+        <a href="{{ url_for('doctor.download_all_reports') }}" class="btn btn-success">Download All Reports (CSV)</a>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+          <thead class="bg-dyslexia-green/10">
+            <tr>
+              <th class="py-2 px-4 border-b">Patient Name</th>
+              {% for key in all_progress[0].keys() %}
+                {% if key != 'patient_name' %}
+                  <th class="py-2 px-4 border-b">{{ key|replace('_', ' ')|title }}</th>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+          {% for row in all_progress %}
+            <tr class="hover:bg-dyslexia-green/5 transition">
+              <td class="py-2 px-4 border-b">{{ row['patient_name'] }}</td>
+              {% for key, value in row.items() %}
+                {% if key != 'patient_name' %}
+                  <td class="py-2 px-4 border-b">{{ value }}</td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-gray-500">No progress data found.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

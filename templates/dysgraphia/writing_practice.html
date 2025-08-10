@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Writing Practice - Dysgraphia Support{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">✍️ Writing Practice</h1>
+        <p style="color: #64748b;">Practice your writing and get feedback on common issues</p>
+    </div>
+    
+    <!-- Writing Area -->
+    <div class="form-group">
+        <label class="form-label">Write about anything you'd like:</label>
+        <textarea id="writingArea" class="form-textarea" rows="10" 
+                  placeholder="Start writing here... You can write about your day, a story, or anything that interests you."
+                  style="font-size: 1.1rem; line-height: 1.8;"></textarea>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <button onclick="analyzeWriting()" class="btn btn-warning">
+            <i class="fas fa-search"></i> Analyze Writing
+        </button>
+        <button onclick="clearText()" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Clear Text
+        </button>
+        <button onclick="getWritingPrompt()" class="btn btn-success">
+            <i class="fas fa-lightbulb"></i> Get Writing Prompt
+        </button>
+    </div>
+    
+    <!-- Analysis Results -->
+    <div id="analysisResults" class="card" style="display: none;">
+        <div class="card-header">
+            <h3 class="card-title">Writing Analysis</h3>
+        </div>
+        <div id="analysisContent"></div>
+    </div>
+    
+    <!-- Writing Tips -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Writing Tips</h3>
+        </div>
+        
+        <div class="grid grid-2">
+            <div>
+                <h4 style="margin-bottom: 1rem; color: #f59e0b;">Before You Write</h4>
+                <ul style="color: #64748b; line-height: 1.8;">
+                    <li>Take your time and don't rush</li>
+                    <li>Think about what you want to say first</li>
+                    <li>Use proper posture and grip</li>
+                    <li>Make sure you have good lighting</li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 style="margin-bottom: 1rem; color: #f59e0b;">While Writing</h4>
+                <ul style="color: #64748b; line-height: 1.8;">
+                    <li>Leave spaces between words</li>
+                    <li>Start sentences with capital letters</li>
+                    <li>Use periods to end sentences</li>
+                    <li>Check your spelling as you go</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function analyzeWriting() {
+    const text = document.getElementById('writingArea').value.trim();
+    
+    if (!text) {
+        showNotification('Please write something first', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/dysgraphia/analyze-writing', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: text })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayAnalysis(result.analysis);
+            document.getElementById('analysisResults').style.display = 'block';
+            showNotification('Writing analyzed successfully!', 'success');
+        } else {
+            showNotification(result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error analyzing writing', 'error');
+    }
+}
+
+function displayAnalysis(analysis) {
+    const content = document.getElementById('analysisContent');
+    
+    let html = `
+        <div class="grid grid-3" style="margin-bottom: 2rem;">
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; color: #f59e0b;">${analysis.word_count}</div>
+                <div style="color: #64748b;">Words Written</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; color: #10b981;">${analysis.sentence_count}</div>
+                <div style="color: #64748b;">Sentences</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; color: #ef4444;">${analysis.issues.length}</div>
+                <div style="color: #64748b;">Issues Found</div>
+            </div>
+        </div>
+    `;
+    
+    if (analysis.issues.length > 0) {
+        html += `
+            <div style="margin-bottom: 2rem;">
+                <h4 style="margin-bottom: 1rem; color: #ef4444;">Issues to Work On:</h4>
+                <div style="display: grid; gap: 0.5rem;">
+        `;
+        
+        analysis.issues.forEach(issue => {
+            html += `
+                <div style="padding: 0.75rem; background: #fee2e2; border-radius: 6px; border-left: 4px solid #ef4444;">
+                    <i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-right: 0.5rem;"></i>
+                    ${issue}
+                </div>
+            `;
+        });
+        
+        html += '</div></div>';
+    }
+    
+    if (analysis.suggestions.length > 0) {
+        html += `
+            <div>
+                <h4 style="margin-bottom: 1rem; color: #10b981;">Suggestions for Improvement:</h4>
+                <div style="display: grid; gap: 0.5rem;">
+        `;
+        
+        analysis.suggestions.forEach(suggestion => {
+            html += `
+                <div style="padding: 0.75rem; background: #d1fae5; border-radius: 6px; border-left: 4px solid #10b981;">
+                    <i class="fas fa-lightbulb" style="color: #10b981; margin-right: 0.5rem;"></i>
+                    ${suggestion}
+                </div>
+            `;
+        });
+        
+        html += '</div></div>';
+    }
+    
+    if (analysis.issues.length === 0) {
+        html += `
+            <div style="text-align: center; padding: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
+                <h4 style="color: #10b981; margin-bottom: 1rem;">Great Job!</h4>
+                <p style="color: #64748b;">Your writing looks good! Keep practicing to continue improving.</p>
+            </div>
+        `;
+    }
+    
+    content.innerHTML = html;
+}
+
+function clearText() {
+    if (confirm('Are you sure you want to clear all text?')) {
+        document.getElementById('writingArea').value = '';
+        document.getElementById('analysisResults').style.display = 'none';
+    }
+}
+
+async function getWritingPrompt() {
+    try {
+        const response = await fetch('/dysgraphia/get-writing-prompt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const currentText = document.getElementById('writingArea').value;
+            const promptText = `Writing Prompt: ${result.prompt}\n\n`;
+            
+            if (currentText.trim()) {
+                if (confirm('This will add a writing prompt to your current text. Continue?')) {
+                    document.getElementById('writingArea').value = promptText + currentText;
+                }
+            } else {
+                document.getElementById('writingArea').value = promptText;
+            }
+            
+            document.getElementById('writingArea').focus();
+        } else {
+            showNotification(result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error getting writing prompt', 'error');
+    }
+}
+</script>
+{% endblock %}

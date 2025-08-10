@@ -1,0 +1,603 @@
+{% extends "base.html" %}
+
+{% block title %}Math Practice - Dyscalculia Support{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">🧮 Math Practice Center</h1>
+        
+        <!-- Difficulty Selection -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Choose Your Level</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <button onclick="setDifficulty('easy')" id="easyBtn" class="difficulty-btn bg-green-100 border-2 border-green-300 text-green-800 p-4 rounded-lg hover:bg-green-200 transition-colors">
+                    <div class="text-2xl mb-2">🟢</div>
+                    <div class="font-semibold">Easy</div>
+                    <div class="text-sm">Numbers 1-10</div>
+                </button>
+                <button onclick="setDifficulty('medium')" id="mediumBtn" class="difficulty-btn bg-yellow-100 border-2 border-yellow-300 text-yellow-800 p-4 rounded-lg hover:bg-yellow-200 transition-colors">
+                    <div class="text-2xl mb-2">🟡</div>
+                    <div class="font-semibold">Medium</div>
+                    <div class="text-sm">Numbers 1-50</div>
+                </button>
+                <button onclick="setDifficulty('hard')" id="hardBtn" class="difficulty-btn bg-red-100 border-2 border-red-300 text-red-800 p-4 rounded-lg hover:bg-red-200 transition-colors">
+                    <div class="text-2xl mb-2">🔴</div>
+                    <div class="font-semibold">Hard</div>
+                    <div class="text-sm">Numbers 1-100</div>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Practice Sections -->
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+            <!-- Arithmetic Section -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-4xl mb-4">➕</div>
+                <h3 class="text-xl font-semibold mb-2">Arithmetic</h3>
+                <p class="text-gray-600 mb-4">Practice addition, subtraction, multiplication, and division</p>
+                <div class="space-y-2 mb-4">
+                    <button onclick="startPractice('arithmetic', 'addition')" class="w-full bg-blue-100 text-blue-800 py-2 rounded hover:bg-blue-200">Addition</button>
+                    <button onclick="startPractice('arithmetic', 'subtraction')" class="w-full bg-green-100 text-green-800 py-2 rounded hover:bg-green-200">Subtraction</button>
+                    <button onclick="startPractice('arithmetic', 'multiplication')" class="w-full bg-purple-100 text-purple-800 py-2 rounded hover:bg-purple-200">Multiplication</button>
+                    <button onclick="startPractice('arithmetic', 'division')" class="w-full bg-orange-100 text-orange-800 py-2 rounded hover:bg-orange-200">Division</button>
+                </div>
+            </div>
+            
+            <!-- Visual Math Section -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-4xl mb-4">👁️</div>
+                <h3 class="text-xl font-semibold mb-2">Visual Math</h3>
+                <p class="text-gray-600 mb-4">Learn with visual representations and objects</p>
+                <div class="space-y-2 mb-4">
+                    <button onclick="startPractice('visual', 'counting')" class="w-full bg-pink-100 text-pink-800 py-2 rounded hover:bg-pink-200">Object Counting</button>
+                    <button onclick="startPractice('visual', 'comparison')" class="w-full bg-indigo-100 text-indigo-800 py-2 rounded hover:bg-indigo-200">Number Comparison</button>
+                    <button onclick="startPractice('visual', 'grouping')" class="w-full bg-teal-100 text-teal-800 py-2 rounded hover:bg-teal-200">Grouping & Sets</button>
+                    <button onclick="startPractice('visual', 'fractions')" class="w-full bg-cyan-100 text-cyan-800 py-2 rounded hover:bg-cyan-200">Visual Fractions</button>
+                </div>
+            </div>
+            
+            <!-- Number Patterns Section -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-4xl mb-4">🔢</div>
+                <h3 class="text-xl font-semibold mb-2">Number Patterns</h3>
+                <p class="text-gray-600 mb-4">Recognize and complete number sequences</p>
+                <div class="space-y-2 mb-4">
+                    <button onclick="startPractice('patterns', 'sequences')" class="w-full bg-red-100 text-red-800 py-2 rounded hover:bg-red-200">Number Sequences</button>
+                    <button onclick="startPractice('patterns', 'skip-counting')" class="w-full bg-yellow-100 text-yellow-800 py-2 rounded hover:bg-yellow-200">Skip Counting</button>
+                    <button onclick="startPractice('patterns', 'odd-even')" class="w-full bg-lime-100 text-lime-800 py-2 rounded hover:bg-lime-200">Odd & Even</button>
+                    <button onclick="startPractice('patterns', 'missing-numbers')" class="w-full bg-emerald-100 text-emerald-800 py-2 rounded hover:bg-emerald-200">Missing Numbers</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Practice Area -->
+        <div id="practiceArea" class="bg-white rounded-lg shadow-md p-6 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="practiceTitle" class="text-2xl font-semibold">Math Practice</h2>
+                <div class="flex space-x-4">
+                    <div id="practiceScore" class="text-lg font-semibold">Score: 0/0</div>
+                    <button onclick="endPractice()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                        End Practice
+                    </button>
+                </div>
+            </div>
+            
+            <div id="practiceContent" class="text-center py-8">
+                <!-- Practice content will be inserted here -->
+            </div>
+            
+            <div id="practiceControls" class="mt-6 text-center hidden">
+                <button id="nextProblem" onclick="nextProblem()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                    Next Problem
+                </button>
+            </div>
+        </div>
+        
+        <!-- Results Modal -->
+        <div id="resultsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-md mx-4">
+                <h2 class="text-2xl font-bold mb-4">Practice Results</h2>
+                <div id="resultsContent" class="mb-6">
+                    <!-- Results will be inserted here -->
+                </div>
+                <div class="flex space-x-4">
+                    <button onclick="continuePractice()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        Continue
+                    </button>
+                    <button onclick="closeResults()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class MathPractice {
+    constructor() {
+        this.currentDifficulty = 'easy';
+        this.currentSection = null;
+        this.currentSubsection = null;
+        this.currentProblem = 0;
+        this.totalProblems = 10;
+        this.score = 0;
+        this.problems = [];
+        
+        this.setDifficulty('easy');
+    }
+    
+    setDifficulty(level) {
+        this.currentDifficulty = level;
+        
+        // Update button styles
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.classList.remove('ring-2', 'ring-blue-500');
+        });
+        
+        document.getElementById(level + 'Btn').classList.add('ring-2', 'ring-blue-500');
+    }
+    
+    startPractice(section, subsection) {
+        this.currentSection = section;
+        this.currentSubsection = subsection;
+        this.currentProblem = 0;
+        this.score = 0;
+        
+        this.generateProblems();
+        
+        document.getElementById('practiceArea').classList.remove('hidden');
+        document.getElementById('practiceTitle').textContent = this.getPracticeTitle();
+        
+        this.showNextProblem();
+    }
+    
+    getPracticeTitle() {
+        const titles = {
+            'arithmetic': {
+                'addition': 'Addition Practice',
+                'subtraction': 'Subtraction Practice',
+                'multiplication': 'Multiplication Practice',
+                'division': 'Division Practice'
+            },
+            'visual': {
+                'counting': 'Object Counting',
+                'comparison': 'Number Comparison',
+                'grouping': 'Grouping & Sets',
+                'fractions': 'Visual Fractions'
+            },
+            'patterns': {
+                'sequences': 'Number Sequences',
+                'skip-counting': 'Skip Counting',
+                'odd-even': 'Odd & Even Numbers',
+                'missing-numbers': 'Missing Numbers'
+            }
+        };
+        
+        return titles[this.currentSection]?.[this.currentSubsection] || 'Math Practice';
+    }
+    
+    generateProblems() {
+        this.problems = [];
+        
+        for (let i = 0; i < this.totalProblems; i++) {
+            if (this.currentSection === 'arithmetic') {
+                this.problems.push(this.generateArithmeticProblem());
+            } else if (this.currentSection === 'visual') {
+                this.problems.push(this.generateVisualProblem());
+            } else if (this.currentSection === 'patterns') {
+                this.problems.push(this.generatePatternProblem());
+            }
+        }
+    }
+    
+    generateArithmeticProblem() {
+        const ranges = {
+            'easy': { min: 1, max: 10 },
+            'medium': { min: 1, max: 50 },
+            'hard': { min: 1, max: 100 }
+        };
+        
+        const range = ranges[this.currentDifficulty];
+        let a = Math.floor(Math.random() * range.max) + range.min;
+        let b = Math.floor(Math.random() * range.max) + range.min;
+        let answer, question;
+        
+        switch (this.currentSubsection) {
+            case 'addition':
+                answer = a + b;
+                question = `${a} + ${b} = ?`;
+                break;
+            case 'subtraction':
+                if (a < b) [a, b] = [b, a]; // Ensure positive result
+                answer = a - b;
+                question = `${a} - ${b} = ?`;
+                break;
+            case 'multiplication':
+                a = Math.floor(Math.random() * 12) + 1;
+                b = Math.floor(Math.random() * 12) + 1;
+                answer = a * b;
+                question = `${a} × ${b} = ?`;
+                break;
+            case 'division':
+                answer = Math.floor(Math.random() * 12) + 1;
+                a = answer * (Math.floor(Math.random() * 12) + 1);
+                b = a / answer;
+                question = `${a} ÷ ${b} = ?`;
+                break;
+        }
+        
+        return {
+            question: question,
+            answer: answer,
+            type: 'input',
+            options: this.generateOptions(answer)
+        };
+    }
+    
+    generateVisualProblem() {
+        const ranges = {
+            'easy': { min: 1, max: 10 },
+            'medium': { min: 1, max: 20 },
+            'hard': { min: 1, max: 30 }
+        };
+        
+        const range = ranges[this.currentDifficulty];
+        
+        switch (this.currentSubsection) {
+            case 'counting':
+                const count = Math.floor(Math.random() * range.max) + range.min;
+                const objects = ['🍎', '🐕', '⭐', '🚗', '🏠', '🌸', '📚', '⚽'];
+                const obj = objects[Math.floor(Math.random() * objects.length)];
+                
+                return {
+                    question: `How many objects do you see?`,
+                    visual: obj.repeat(count),
+                    answer: count,
+                    type: 'multiple-choice',
+                    options: this.generateOptions(count)
+                };
+                
+            case 'comparison':
+                const num1 = Math.floor(Math.random() * range.max) + range.min;
+                const num2 = Math.floor(Math.random() * range.max) + range.min;
+                const comparison = num1 > num2 ? '>' : num1 < num2 ? '<' : '=';
+                
+                return {
+                    question: `Which symbol completes: ${num1} ? ${num2}`,
+                    answer: comparison,
+                    type: 'multiple-choice',
+                    options: ['>', '<', '=']
+                };
+                
+            case 'grouping':
+                const total = Math.floor(Math.random() * 20) + 5;
+                const groups = Math.floor(Math.random() * 4) + 2;
+                const perGroup = Math.floor(total / groups);
+                
+                return {
+                    question: `If you have ${total} items in ${groups} equal groups, how many items per group?`,
+                    answer: perGroup,
+                    type: 'multiple-choice',
+                    options: this.generateOptions(perGroup)
+                };
+                
+            case 'fractions':
+                const numerator = Math.floor(Math.random() * 4) + 1;
+                const denominator = Math.floor(Math.random() * 4) + numerator;
+                
+                return {
+                    question: `What fraction is shaded?`,
+                    visual: this.generateFractionVisual(numerator, denominator),
+                    answer: `${numerator}/${denominator}`,
+                    type: 'multiple-choice',
+                    options: [
+                        `${numerator}/${denominator}`,
+                        `${numerator + 1}/${denominator}`,
+                        `${numerator}/${denominator + 1}`,
+                        `${numerator - 1}/${denominator}`
+                    ].filter(f => !f.includes('0') && !f.includes('-'))
+                };
+        }
+    }
+    
+    generatePatternProblem() {
+        const ranges = {
+            'easy': { min: 1, max: 20 },
+            'medium': { min: 1, max: 50 },
+            'hard': { min: 1, max: 100 }
+        };
+        
+        const range = ranges[this.currentDifficulty];
+        
+        switch (this.currentSubsection) {
+            case 'sequences':
+                const start = Math.floor(Math.random() * range.max) + range.min;
+                const step = Math.floor(Math.random() * 5) + 1;
+                const sequence = [start, start + step, start + (step * 2)];
+                const answer = start + (step * 3);
+                
+                return {
+                    question: `What comes next in the sequence: ${sequence.join(', ')}, ?`,
+                    answer: answer,
+                    type: 'multiple-choice',
+                    options: this.generateOptions(answer)
+                };
+                
+            case 'skip-counting':
+                const skipBy = [2, 3, 5, 10][Math.floor(Math.random() * 4)];
+                const startNum = skipBy;
+                const sequence2 = [startNum, startNum + skipBy, startNum + (skipBy * 2)];
+                const answer2 = startNum + (skipBy * 3);
+                
+                return {
+                    question: `Skip counting by ${skipBy}: ${sequence2.join(', ')}, ?`,
+                    answer: answer2,
+                    type: 'multiple-choice',
+                    options: this.generateOptions(answer2)
+                };
+                
+            case 'odd-even':
+                const num = Math.floor(Math.random() * range.max) + range.min;
+                const isOdd = num % 2 === 1;
+                
+                return {
+                    question: `Is ${num} odd or even?`,
+                    answer: isOdd ? 'odd' : 'even',
+                    type: 'multiple-choice',
+                    options: ['odd', 'even']
+                };
+                
+            case 'missing-numbers':
+                const start3 = Math.floor(Math.random() * range.max) + range.min;
+                const missing = start3 + 2;
+                
+                return {
+                    question: `Fill in the missing number: ${start3}, ${start3 + 1}, ?, ${start3 + 3}`,
+                    answer: missing,
+                    type: 'input',
+                    options: this.generateOptions(missing)
+                };
+        }
+    }
+    
+    generateOptions(correct) {
+        const options = [correct];
+        
+        while (options.length < 4) {
+            const wrong = correct + Math.floor(Math.random() * 10) - 5;
+            if (wrong > 0 && !options.includes(wrong)) {
+                options.push(wrong);
+            }
+        }
+        
+        // Shuffle options
+        for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
+        }
+        
+        return options;
+    }
+    
+    generateFractionVisual(numerator, denominator) {
+        let visual = '<div class="flex space-x-1">';
+        for (let i = 0; i < denominator; i++) {
+            const filled = i < numerator ? 'bg-blue-500' : 'bg-gray-200';
+            visual += `<div class="w-8 h-8 ${filled} border border-gray-400"></div>`;
+        }
+        visual += '</div>';
+        return visual;
+    }
+    
+    showNextProblem() {
+        if (this.currentProblem >= this.totalProblems) {
+            this.showResults();
+            return;
+        }
+        
+        const problem = this.problems[this.currentProblem];
+        const content = document.getElementById('practiceContent');
+        
+        let html = `<div class="text-2xl mb-6">${problem.question}</div>`;
+        
+        if (problem.visual) {
+            html += `<div class="mb-6">${problem.visual}</div>`;
+        }
+        
+        if (problem.type === 'input') {
+            html += `
+                <div class="max-w-xs mx-auto">
+                    <input type="number" id="answerInput" class="w-full px-4 py-3 text-xl text-center border border-gray-300 rounded-lg mb-4" placeholder="Your answer">
+                    <button onclick="mathPractice.checkAnswer()" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 text-lg font-semibold">
+                        Submit Answer
+                    </button>
+                </div>
+            `;
+        } else {
+            html += '<div class="grid grid-cols-2 gap-4 max-w-md mx-auto">';
+            problem.options.forEach(option => {
+                html += `
+                    <button onclick="mathPractice.checkAnswer('${option}')" 
+                            class="bg-blue-100 hover:bg-blue-200 border border-blue-300 rounded-lg p-4 text-lg font-semibold transition-colors">
+                        ${option}
+                    </button>
+                `;
+            });
+            html += '</div>';
+        }
+        
+        content.innerHTML = html;
+        
+        if (problem.type === 'input') {
+            setTimeout(() => document.getElementById('answerInput')?.focus(), 100);
+        }
+        
+        this.updateScore();
+    }
+    
+    checkAnswer(selectedAnswer = null) {
+        const problem = this.problems[this.currentProblem];
+        let userAnswer;
+        
+        if (problem.type === 'input') {
+            const input = document.getElementById('answerInput');
+            userAnswer = input ? input.value : '';
+            
+            // Convert to number if it's a numeric answer
+            if (!isNaN(problem.answer)) {
+                userAnswer = parseFloat(userAnswer);
+            }
+        } else {
+            userAnswer = selectedAnswer;
+            
+            // Convert to number if it's a numeric answer
+            if (!isNaN(problem.answer)) {
+                userAnswer = parseFloat(userAnswer);
+            }
+        }
+        
+        const isCorrect = userAnswer == problem.answer;
+        
+        if (isCorrect) {
+            this.score++;
+        }
+        
+        this.showFeedback(isCorrect, problem.answer);
+        this.currentProblem++;
+        
+        setTimeout(() => {
+            this.showNextProblem();
+        }, 2000);
+    }
+    
+    showFeedback(isCorrect, correctAnswer) {
+        const content = document.getElementById('practiceContent');
+        
+        if (isCorrect) {
+            content.innerHTML = `
+                <div class="text-6xl mb-4">🎉</div>
+                <div class="text-2xl text-green-600 font-bold">Correct!</div>
+                <div class="text-lg mt-2">Great job!</div>
+            `;
+        } else {
+            content.innerHTML = `
+                <div class="text-6xl mb-4">😅</div>
+                <div class="text-2xl text-red-600 font-bold">Not quite!</div>
+                <div class="text-lg mt-2">The correct answer was: <strong>${correctAnswer}</strong></div>
+            `;
+        }
+    }
+    
+    updateScore() {
+        document.getElementById('practiceScore').textContent = `Score: ${this.score}/${this.currentProblem}`;
+    }
+    
+    showResults() {
+        const modal = document.getElementById('resultsModal');
+        const content = document.getElementById('resultsContent');
+        
+        const percentage = Math.round((this.score / this.totalProblems) * 100);
+        let performance, emoji;
+        
+        if (percentage >= 80) {
+            performance = 'Excellent!';
+            emoji = '🏆';
+        } else if (percentage >= 60) {
+            performance = 'Good job!';
+            emoji = '👍';
+        } else {
+            performance = 'Keep practicing!';
+            emoji = '💪';
+        }
+        
+        content.innerHTML = `
+            <div class="text-center">
+                <div class="text-6xl mb-4">${emoji}</div>
+                <div class="text-2xl font-bold mb-2">${performance}</div>
+                <div class="text-lg mb-4">Final Score: ${this.score}/${this.totalProblems}</div>
+                <div class="text-lg">Accuracy: ${percentage}%</div>
+            </div>
+        `;
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        this.saveProgress();
+    }
+    
+    async saveProgress() {
+        try {
+            await fetch('/dyscalculia/save-practice-progress', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    section: this.currentSection,
+                    subsection: this.currentSubsection,
+                    difficulty: this.currentDifficulty,
+                    score: this.score,
+                    total: this.totalProblems,
+                    accuracy: (this.score / this.totalProblems) * 100
+                })
+            });
+        } catch (error) {
+            console.error('Error saving progress:', error);
+        }
+    }
+    
+    endPractice() {
+        document.getElementById('practiceArea').classList.add('hidden');
+        this.currentSection = null;
+        this.currentSubsection = null;
+    }
+}
+
+// Global functions
+let mathPractice;
+
+function setDifficulty(level) {
+    if (!mathPractice) {
+        mathPractice = new MathPractice();
+    }
+    mathPractice.setDifficulty(level);
+}
+
+function startPractice(section, subsection) {
+    if (!mathPractice) {
+        mathPractice = new MathPractice();
+    }
+    mathPractice.startPractice(section, subsection);
+}
+
+function endPractice() {
+    if (mathPractice) {
+        mathPractice.endPractice();
+    }
+}
+
+function nextProblem() {
+    if (mathPractice) {
+        mathPractice.showNextProblem();
+    }
+}
+
+function continuePractice() {
+    closeResults();
+    if (mathPractice) {
+        mathPractice.startPractice(mathPractice.currentSection, mathPractice.currentSubsection);
+    }
+}
+
+function closeResults() {
+    const modal = document.getElementById('resultsModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    mathPractice = new MathPractice();
+});
+</script>
+{% endblock %}

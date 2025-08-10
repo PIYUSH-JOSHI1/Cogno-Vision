@@ -1,0 +1,1044 @@
+{% extends "base.html" %}
+
+{% block title %}Balance Training - Dyspraxia Support{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+    <h1 class="card-title">Advanced Balance Training with Pose Detection</h1>
+        <p style="color: #64748b;">Practice balance exercises with real-time pose analysis and automatic frame capture</p>
+    </div>
+    
+    <!-- Camera Setup -->
+    <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <button onclick="startCamera()" id="startCameraBtn" class="btn btn-success">
+                <i class="fas fa-video"></i> Start Camera & Pose Detection
+            </button>
+            <button onclick="stopCamera()" id="stopCameraBtn" class="btn btn-danger" style="display: none;">
+                <i class="fas fa-video-slash"></i> Stop Camera
+            </button>
+            <div id="cameraStatus" style="color: #64748b; font-weight: 500;">Camera not active</div>
+            <div id="poseStatus" style="color: #64748b; font-weight: 500; margin-left: 1rem;">Pose detection: Off</div>
+        </div>
+    </div>
+    
+    <!-- Difficulty Selection -->
+    <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h4 style="margin-bottom: 1rem;">Choose Difficulty Level</h4>
+        <div class="grid grid-3" style="gap: 1rem;">
+            <button onclick="setDifficulty('easy')" class="btn btn-success difficulty-btn" data-difficulty="easy">
+                <i class="fas fa-smile"></i> Easy (15-30s)
+            </button>
+            <button onclick="setDifficulty('medium')" class="btn btn-warning difficulty-btn" data-difficulty="medium">
+                <i class="fas fa-meh"></i> Medium (15-25s)
+            </button>
+            <button onclick="setDifficulty('hard')" class="btn btn-danger difficulty-btn" data-difficulty="hard">
+                <i class="fas fa-frown"></i> Hard (12-35s)
+            </button>
+        </div>
+    </div>
+    
+    <!-- Exercise Display -->
+    <div class="card" id="exerciseCard" style="display: none;">
+        <div class="card-header">
+            <h3 class="card-title" id="exerciseTitle">Balance Exercise</h3>
+            <div style="display: flex; gap: 1rem;">
+                <button onclick="getNewExercise()" class="btn btn-success">New Exercise</button>
+                <button onclick="calibratePose()" id="calibrateBtn" class="btn btn-primary">Calibrate Pose</button>
+            </div>
+        </div>
+        
+        <div class="grid grid-2">
+            <!-- Camera Feed with Pose Overlay -->
+            <div style="position: relative;">
+                <video id="videoElement" width="100%" height="400" style="border-radius: 8px; background: #000;" autoplay muted></video>
+                <canvas id="poseCanvas" width="640" height="480" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
+                
+                <!-- Frame Capture Indicator -->
+                <div id="frameCapture" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 0.5rem; border-radius: 4px; display: none;">
+                    <i class="fas fa-camera"></i> Capturing Frame
+                </div>
+                
+                <!-- Pose Status Indicator -->
+                <div id="poseStatusIndicator" style="position: absolute; bottom: 10px; left: 10px; padding: 0.5rem; border-radius: 4px; font-weight: bold;">
+                    <div id="poseCorrectIndicator" style="background: #ef4444; color: white; padding: 0.25rem 0.5rem; border-radius: 4px;">
+                        Pose: Not Detected
+                    </div>
+                </div>
+                
+                <div id="noCameraBalance" style="display: flex; align-items: center; justify-content: center; height: 400px; background: #f8fafc; border-radius: 8px;">
+                    <div style="text-align: center; color: #64748b;">
+                        <i class="fas fa-camera" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>Start camera for pose detection</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Exercise Instructions and Feedback -->
+            <div>
+                <div id="exerciseContent" style="padding: 2rem; background: #f8fafc; border-radius: 8px; text-align: center; margin-bottom: 1rem;">
+                    <div id="exerciseInstructions">
+                        <p style="color: #64748b;">Select difficulty and start camera to begin</p>
+                    </div>
+                </div>
+                
+                <!-- Real-time Feedback -->
+                <div id="realTimeFeedback" style="padding: 1rem; background: #fee2e2; border-radius: 8px; margin-bottom: 1rem; display: none;">
+                    <h5 style="color: #ef4444; margin-bottom: 0.5rem;">Live Feedback</h5>
+                    <div id="stabilityMeter" style="margin-bottom: 1rem;">
+                        <div style="background: #e5e7eb; height: 20px; border-radius: 10px; overflow: hidden;">
+                            <div id="stabilityBar" style="background: #10b981; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                        </div>
+                        <div style="text-align: center; margin-top: 0.5rem;">
+                            <span id="stabilityText">Stability: 0%</span>
+                        </div>
+                    </div>
+                    <div id="feedbackText" style="color: #64748b; font-size: 0.9rem;"></div>
+                </div>
+                
+                <!-- Frame Statistics -->
+                <div id="frameStats" style="padding: 1rem; background: #f0f9ff; border-radius: 8px; font-size: 0.9rem; display: none;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <strong>Correct Poses:</strong> <span id="correctPoses">0</span>
+                        </div>
+                        <div>
+                            <strong>Total Frames:</strong> <span id="totalFrames">0</span>
+                        </div>
+                        <div>
+                            <strong>Accuracy:</strong> <span id="poseAccuracy">0%</span>
+                        </div>
+                        <div>
+                            <strong>Frames Saved:</strong> <span id="framesSaved">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Timer and Controls -->
+        <div style="padding: 1rem; text-align: center; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <div style="margin-bottom: 1rem;">
+                <div id="timer" style="font-size: 3rem; font-weight: bold; color: #ef4444;">00:00</div>
+                <div style="color: #64748b;">Time Remaining</div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <button onclick="startExercise()" id="startBtn" class="btn btn-success">
+                    <i class="fas fa-play"></i> Start Exercise
+                </button>
+                <button onclick="stopExercise()" id="stopBtn" class="btn btn-danger" style="display: none;">
+                    <i class="fas fa-stop"></i> Stop Exercise
+                </button>
+                <button onclick="pauseExercise()" id="pauseBtn" class="btn btn-warning" style="display: none;">
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+            </div>
+        </div>
+        
+        <!-- Results -->
+        <div id="exerciseResults" style="display: none; padding: 1rem; background: #f0f9ff; border-top: 1px solid #e2e8f0;">
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- MediaPipe and Pose Detection Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+
+<script>
+let currentDifficulty = 'easy';
+let currentExercise = null;
+let exerciseTimer = null;
+let timeRemaining = 0;
+let exerciseStartTime = null;
+let exerciseActive = false;
+let exercisePaused = false;
+
+// Camera and pose detection variables
+let videoStream = null;
+let videoElement = null;
+let poseCanvas = null;
+let poseCtx = null;
+let pose = null;
+let camera = null;
+
+// Pose tracking variables
+let poseDetected = false;
+let stabilityHistory = [];
+let currentStability = 0;
+let baselinePose = null;
+let poseCalibrated = false;
+
+// Frame processing variables
+let frameInterval = null;
+let correctPosesCount = 0;
+let totalFramesCount = 0;
+let framesSavedCount = 0;
+let lastPoseCorrect = false;
+let frameProcessingActive = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    videoElement = document.getElementById('videoElement');
+    poseCanvas = document.getElementById('poseCanvas');
+    poseCtx = poseCanvas.getContext('2d');
+    initializePoseDetection();
+});
+
+function initializePoseDetection() {
+    // Initialize MediaPipe Pose
+    pose = new Pose({
+        locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+        }
+    });
+    pose.setOptions({
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        enableSegmentation: false,
+        smoothSegmentation: false,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+    });
+    pose.onResults(onPoseResults);
+}
+
+async function startCamera() {
+    try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: 640, 
+                height: 480,
+                facingMode: 'user'
+            } 
+        });
+        
+        videoElement.srcObject = videoStream;
+        videoElement.style.display = 'block';
+        document.getElementById('noCameraBalance').style.display = 'none';
+        
+        document.getElementById('startCameraBtn').style.display = 'none';
+        document.getElementById('stopCameraBtn').style.display = 'inline-block';
+        document.getElementById('cameraStatus').textContent = 'Camera active';
+        document.getElementById('poseStatus').textContent = 'Pose detection: Starting...';
+        
+        // Start pose detection
+        camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await pose.send({image: videoElement});
+            },
+            width: 640,
+            height: 480
+        });
+        camera.start();
+        
+        document.getElementById('poseStatus').textContent = 'Pose detection: Active';
+        showNotification('Camera and pose detection started!', 'success');
+        
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        showNotification('Could not access camera. Please check permissions.', 'error');
+        document.getElementById('cameraStatus').textContent = 'Camera access denied';
+    }
+}
+
+function stopCamera() {
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+    }
+    
+    if (camera) {
+        camera.stop();
+        camera = null;
+    }
+    
+    videoElement.style.display = 'none';
+    document.getElementById('noCameraBalance').style.display = 'flex';
+    
+    document.getElementById('startCameraBtn').style.display = 'inline-block';
+    document.getElementById('stopCameraBtn').style.display = 'none';
+    document.getElementById('cameraStatus').textContent = 'Camera stopped';
+    document.getElementById('poseStatus').textContent = 'Pose detection: Off';
+    
+    stopExercise();
+    clearPoseCanvas();
+}
+
+function onPoseResults(results) {
+    // Clear canvas
+    poseCtx.clearRect(0, 0, poseCanvas.width, poseCanvas.height);
+    
+    if (results.poseLandmarks) {
+        poseDetected = true;
+        updatePoseIndicator(true);
+        
+        // Draw pose landmarks
+        drawPoseLandmarks(results.poseLandmarks);
+        
+        // Analyze pose stability
+        if (exerciseActive && !exercisePaused) {
+            analyzePoseStability(results.poseLandmarks);
+        }
+        
+    } else {
+        poseDetected = false;
+        updatePoseIndicator(false);
+        currentStability = 0;
+        updateStabilityDisplay();
+    }
+}
+
+function updatePoseIndicator(detected) {
+    const indicator = document.getElementById('poseCorrectIndicator');
+    if (detected) {
+        if (lastPoseCorrect) {
+            indicator.style.background = '#10b981';
+            indicator.textContent = 'Pose: Correct ✓';
+        } else {
+            indicator.style.background = '#f59e0b';
+            indicator.textContent = 'Pose: Adjust Position';
+        }
+    } else {
+        indicator.style.background = '#ef4444';
+        indicator.textContent = 'Pose: Not Detected';
+    }
+}
+
+function drawPoseLandmarks(landmarks) {
+    // Draw pose connections
+    const connections = [
+        [11, 12], [11, 13], [13, 15], [12, 14], [14, 16], // shoulders and arms
+        [11, 23], [12, 24], [23, 24], // torso
+        [23, 25], [25, 27], [27, 29], [29, 31], // left leg
+        [24, 26], [26, 28], [28, 30], [30, 32], // right leg
+        [15, 17], [15, 19], [15, 21], [17, 19], // left hand
+        [16, 18], [16, 20], [16, 22], [18, 20]  // right hand
+    ];
+    
+    // Draw connections
+    poseCtx.strokeStyle = lastPoseCorrect ? '#00ff00' : '#ff6600';
+    poseCtx.lineWidth = 2;
+    
+    connections.forEach(([start, end]) => {
+        const startPoint = landmarks[start];
+        const endPoint = landmarks[end];
+        
+        if (startPoint && endPoint) {
+            poseCtx.beginPath();
+            poseCtx.moveTo(startPoint.x * poseCanvas.width, startPoint.y * poseCanvas.height);
+            poseCtx.lineTo(endPoint.x * poseCanvas.width, endPoint.y * poseCanvas.height);
+            poseCtx.stroke();
+        }
+    });
+    
+    // Draw key landmarks
+    poseCtx.fillStyle = lastPoseCorrect ? '#00ff00' : '#ff6600';
+    const keyPoints = [11, 12, 23, 24, 25, 26]; // shoulders, hips
+    
+    keyPoints.forEach(pointIndex => {
+        const point = landmarks[pointIndex];
+        if (point) {
+            poseCtx.beginPath();
+            poseCtx.arc(
+                point.x * poseCanvas.width, 
+                point.y * poseCanvas.height, 
+                5, 0, 2 * Math.PI
+            );
+            poseCtx.fill();
+        }
+    });
+    
+    // Draw center of mass indicator
+    const centerOfMass = calculateCenterOfMass(landmarks);
+    if (centerOfMass) {
+        poseCtx.fillStyle = lastPoseCorrect ? '#0066ff' : '#ff3300';
+        poseCtx.beginPath();
+        poseCtx.arc(
+            centerOfMass.x * poseCanvas.width,
+            centerOfMass.y * poseCanvas.height,
+            8, 0, 2 * Math.PI
+        );
+        poseCtx.fill();
+        
+        // Draw stability zone
+        poseCtx.strokeStyle = lastPoseCorrect ? '#0066ff' : '#ff3300';
+        poseCtx.lineWidth = 1;
+        poseCtx.setLineDash([5, 5]);
+        poseCtx.beginPath();
+        poseCtx.arc(
+            centerOfMass.x * poseCanvas.width,
+            centerOfMass.y * poseCanvas.height,
+            30, 0, 2 * Math.PI
+        );
+        poseCtx.stroke();
+        poseCtx.setLineDash([]);
+    }
+}
+
+function calculateCenterOfMass(landmarks) {
+    // Calculate center of mass using hip landmarks
+    const leftHip = landmarks[23];
+    const rightHip = landmarks[24];
+    
+    if (leftHip && rightHip) {
+        return {
+            x: (leftHip.x + rightHip.x) / 2,
+            y: (leftHip.y + rightHip.y) / 2
+        };
+    }
+    return null;
+}
+
+function analyzePoseStability(landmarks) {
+    const centerOfMass = calculateCenterOfMass(landmarks);
+    
+    if (!centerOfMass) {
+        currentStability = 0;
+        updateStabilityDisplay();
+        return;
+    }
+    
+    // If we have a baseline pose, compare against it
+    if (poseCalibrated && baselinePose) {
+        const deviation = Math.sqrt(
+            Math.pow(centerOfMass.x - baselinePose.x, 2) + 
+            Math.pow(centerOfMass.y - baselinePose.y, 2)
+        );
+        
+        // Convert deviation to stability score (0-100)
+        currentStability = Math.max(0, 100 - (deviation * 1000));
+    } else {
+        // Without baseline, use movement analysis
+        stabilityHistory.push(centerOfMass);
+        
+        if (stabilityHistory.length > 10) {
+            stabilityHistory.shift();
+        }
+        
+        if (stabilityHistory.length >= 5) {
+            const avgX = stabilityHistory.reduce((sum, pos) => sum + pos.x, 0) / stabilityHistory.length;
+            const avgY = stabilityHistory.reduce((sum, pos) => sum + pos.y, 0) / stabilityHistory.length;
+            
+            const variance = stabilityHistory.reduce((sum, pos) => {
+                return sum + Math.pow(pos.x - avgX, 2) + Math.pow(pos.y - avgY, 2);
+            }, 0) / stabilityHistory.length;
+            
+            currentStability = Math.max(0, 100 - (variance * 10000));
+        }
+    }
+    
+    updateStabilityDisplay();
+    updateRealTimeFeedback();
+}
+
+function updateStabilityDisplay() {
+    const stabilityBar = document.getElementById('stabilityBar');
+    const stabilityText = document.getElementById('stabilityText');
+    
+    stabilityBar.style.width = currentStability + '%';
+    stabilityText.textContent = `Stability: ${Math.round(currentStability)}%`;
+    
+    // Update color based on stability
+    if (currentStability >= 80) {
+        stabilityBar.style.background = '#10b981';
+    } else if (currentStability >= 60) {
+        stabilityBar.style.background = '#f59e0b';
+    } else {
+        stabilityBar.style.background = '#ef4444';
+    }
+}
+
+function updateRealTimeFeedback() {
+    const feedbackText = document.getElementById('feedbackText');
+    
+    if (currentStability >= 85) {
+        feedbackText.textContent = '🎉 Excellent balance! You\'re very stable.';
+        feedbackText.style.color = '#10b981';
+    } else if (currentStability >= 70) {
+        feedbackText.textContent = '👍 Good balance! Try to stay steady.';
+        feedbackText.style.color = '#f59e0b';
+    } else if (currentStability >= 50) {
+        feedbackText.textContent = '⚠️ Focus on your balance. Use your arms for stability.';
+        feedbackText.style.color = '#f59e0b';
+    } else {
+        feedbackText.textContent = '❌ Work on maintaining your balance. Keep practicing!';
+        feedbackText.style.color = '#ef4444';
+    }
+}
+
+function calibratePose() {
+    if (!poseDetected) {
+        showNotification('Please stand in view of the camera first', 'warning');
+        return;
+    }
+    
+    // Get current pose as baseline (this would use actual landmarks in real implementation)
+    if (stabilityHistory.length > 0) {
+        baselinePose = stabilityHistory[stabilityHistory.length - 1];
+        poseCalibrated = true;
+        document.getElementById('calibrateBtn').textContent = 'Recalibrated ✓';
+        document.getElementById('calibrateBtn').classList.remove('btn-primary');
+        document.getElementById('calibrateBtn').classList.add('btn-success');
+        showNotification('Pose calibrated! This is your baseline position.', 'success');
+        
+        // Reset after 3 seconds
+        setTimeout(() => {
+            document.getElementById('calibrateBtn').textContent = 'Recalibrate';
+            document.getElementById('calibrateBtn').classList.remove('btn-success');
+            document.getElementById('calibrateBtn').classList.add('btn-primary');
+        }, 3000);
+    } else {
+        showNotification('Could not detect pose for calibration', 'error');
+    }
+}
+
+function clearPoseCanvas() {
+    if (poseCtx) {
+        poseCtx.clearRect(0, 0, poseCanvas.width, poseCanvas.height);
+    }
+}
+
+function setDifficulty(difficulty) {
+    currentDifficulty = difficulty;
+    
+    // Update button styles
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.classList.remove('btn-success', 'btn-warning', 'btn-danger');
+        btn.classList.add('btn-primary');
+    });
+    
+    const selectedBtn = document.querySelector(`[data-difficulty="${difficulty}"]`);
+    selectedBtn.classList.remove('btn-primary');
+    if (difficulty === 'easy') selectedBtn.classList.add('btn-success');
+    else if (difficulty === 'medium') selectedBtn.classList.add('btn-warning');
+    else selectedBtn.classList.add('btn-danger');
+    
+    getNewExercise();
+}
+
+async function getNewExercise() {
+    try {
+        const response = await fetch('/dyspraxia/get-balance-exercise', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                difficulty: currentDifficulty
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            currentExercise = result.exercise;
+            displayExercise(result.exercise);
+            document.getElementById('exerciseCard').style.display = 'block';
+            resetTimer();
+        } else {
+            showNotification(result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error getting exercise', 'error');
+    }
+}
+
+function displayExercise(exercise) {
+    document.getElementById('exerciseTitle').textContent = exercise.name;
+    
+    const content = document.getElementById('exerciseInstructions');
+    // Reference pose images for each exercise (Google Images or royalty-free)
+    const poseImages = {
+        'Single Leg Stand': 'https://moticon.com/wp-content/uploads/2024/01/RT012-06.jpg',
+        'Heel-to-Toe Walk': 'https://www.wikihow.com/images/thumb/b/b0/Walk-Step-2-Version-4.jpg/v4-460px-Walk-Step-2-Version-4.jpg',
+        'Balance Beam Walk': 'https://www.scotplay.co.uk/wp-content/uploads/2023/04/SingleBalanceBeam.webp',
+        'Eyes Closed Balance': 'https://miro.medium.com/v2/resize:fit:320/1*miMXFR4przZI1nJ93HYSQg.jpeg',
+        'Dynamic Balance': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkHJ_N8ejJCNhN0e-PEV3UVWtoJocmNVObHg&s',
+        'Tandem Stance': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNT8-PMFzS4l4_EFegfblFvlL7ZhgKotbEFA&s',
+        'Sideways Walk': 'https://media.istockphoto.com/id/1218775476/photo/male-student-with-a-backpack-walking.jpg?s=612x612&w=0&k=20&c=lcV-2VbbRR8McabfuvInwew0Zw7N-Gfs6SJK2w6fd78=',
+        'Balance with Object': 'https://perfectbalance.ae/wp-content/uploads/Balance-coordination.webp',
+        'March in Place': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSn0FFheVPk7KPBlXZ66tYf1ZIaSUjFx0JkJQ&s',
+        'Tree Pose Hold': 'https://cdn.yogajournal.com/wp-content/uploads/2021/11/Tree-Pose-Vrksasana-2.jpg',
+        'Clock Reaches': 'https://images.squarespace-cdn.com/content/v1/5f5e8592d2b0854b18af6975/1626301045658-5NK5EH8HY61V1QZVLSP6/Shoulder%2BClocks.jpg',
+        'Weight Shift Balance': 'https://cdn.flintrehab.com/uploads/2022/09/tbi-exercises-balance-1.jpg',
+        'Stork Stand Progressive': 'https://i.ytimg.com/vi/LRoG-lLYU1A/hqdefault.jpg'
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    const poseImgUrl = poseImages[exercise.name] || '';
+    content.innerHTML = `
+        <div style="margin-bottom: 2rem; display: flex; flex-direction: column; align-items: center;">
+            <!-- Pose image is now shown above, emoji removed -->
+            <h3 style="margin-bottom: 1rem; color: #ef4444;">${exercise.name}</h3>
+            <p style="font-size: 1.2rem; color: #64748b; margin-bottom: 1rem;">${exercise.description}</p>
+            ${poseImgUrl ? `<img src="${poseImgUrl}" alt="${exercise.name} reference" style="max-width: 320px; border: 4px solid #3b82f6; border-radius: 12px; margin: 1rem 0; box-shadow: 0 2px 12px #0001;">` : ''}
+        </div>
+        <div style="background: #fee2e2; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+            <h4 style="color: #ef4444; margin-bottom: 1rem;">Instructions:</h4>
+            <p style="color: #64748b; font-size: 1.1rem; line-height: 1.6; margin-bottom: 1rem;">${exercise.instructions}</p>
+            ${exercise.tips ? `
+                <div style="margin-top: 1rem;">
+                    <h5 style="color: #ef4444; margin-bottom: 0.5rem;">Tips:</h5>
+                    <ul style="color: #64748b; margin: 0; padding-left: 1.5rem;">
+                        ${exercise.tips.map(tip => `<li>${tip}</li>`).join('')}
+                    </ul>
+                </div>
+            ` : ''}
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; text-align: center;">
+            <div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #ef4444;">${exercise.duration}s</div>
+                <div style="color: #64748b;">Duration</div>
+            </div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #f59e0b;">${exercise.difficulty}</div>
+                <div style="color: #64748b;">Difficulty</div>
+            </div>
+        </div>
+    `;
+    
+    timeRemaining = exercise.duration;
+    updateTimerDisplay();
+}
+
+function startExercise() {
+    if (!currentExercise) {
+        showNotification('Please select an exercise first', 'warning');
+        return;
+    }
+    if (!poseDetected) {
+        showNotification('Please stand in view of the camera to detect your pose', 'warning');
+        return;
+    }
+    
+    // Reset statistics
+    correctPosesCount = 0;
+    totalFramesCount = 0;
+    framesSavedCount = 0;
+    lastPoseCorrect = false;
+    
+    exerciseStartTime = Date.now();
+    timeRemaining = currentExercise.duration;
+    exerciseActive = true;
+    exercisePaused = false;
+    frameProcessingActive = true;
+    stabilityHistory = [];
+    currentStability = 0;
+    
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'inline-block';
+    document.getElementById('pauseBtn').style.display = 'inline-block';
+    document.getElementById('realTimeFeedback').style.display = 'block';
+    document.getElementById('frameStats').style.display = 'block';
+    
+    updateFrameStats();
+    
+    // Timer for exercise countdown
+    exerciseTimer = setInterval(() => {
+        if (!exercisePaused) {
+            timeRemaining--;
+            updateTimerDisplay();
+            if (timeRemaining <= 0) {
+                completeExercise();
+            }
+        }
+    }, 1000);
+    
+    // Start frame processing every 2 seconds
+    startFrameProcessing();
+    
+    showNotification('Exercise started! Maintain your pose - frames will be captured automatically when pose is correct.', 'success');
+}
+
+function startFrameProcessing() {
+    if (frameInterval) clearInterval(frameInterval);
+    
+    frameInterval = setInterval(() => {
+        if (exerciseActive && !exercisePaused && frameProcessingActive) {
+            processCurrentFrame();
+        }
+    }, 2000); // Process every 2 seconds
+}
+
+function stopFrameProcessing() {
+    if (frameInterval) {
+        clearInterval(frameInterval);
+        frameInterval = null;
+    }
+}
+
+async function processCurrentFrame() {
+    if (!videoElement || videoElement.readyState < 2) return;
+    
+    // Show frame capture indicator
+    document.getElementById('frameCapture').style.display = 'block';
+    setTimeout(() => {
+        document.getElementById('frameCapture').style.display = 'none';
+    }, 500);
+    
+    // Capture current frame from video
+    let canvas = document.createElement('canvas');
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+    let ctx = canvas.getContext('2d');
+    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+    let frameData = canvas.toDataURL('image/jpeg').split(',')[1]; // base64
+    
+    totalFramesCount++;
+    
+    try {
+        const response = await fetch('/dyspraxia/process-frame', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                frame: frameData,
+                exercise_name: currentExercise.name,
+                timer: timeRemaining
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            lastPoseCorrect = result.pose_correct;
+            
+            if (result.pose_correct) {
+                correctPosesCount++;
+                if (result.frame_saved) {
+                    framesSavedCount++;
+                }
+            }
+            
+            updatePoseIndicator(poseDetected);
+            updateFrameStats();
+            
+            if (result.autoend) {
+                completeExercise();
+            }
+        }
+    } catch (error) {
+        console.error('Error processing frame:', error);
+    }
+}
+
+function updateFrameStats() {
+    document.getElementById('correctPoses').textContent = correctPosesCount;
+    document.getElementById('totalFrames').textContent = totalFramesCount;
+    document.getElementById('framesSaved').textContent = framesSavedCount;
+    
+    const accuracy = totalFramesCount > 0 ? Math.round((correctPosesCount / totalFramesCount) * 100) : 0;
+    document.getElementById('poseAccuracy').textContent = accuracy + '%';
+}
+
+function pauseExercise() {
+    exercisePaused = !exercisePaused;
+    frameProcessingActive = !exercisePaused;
+    const pauseBtn = document.getElementById('pauseBtn');
+    
+    if (exercisePaused) {
+        pauseBtn.innerHTML = '<i class="fas fa-play"></i> Resume';
+        pauseBtn.classList.remove('btn-warning');
+        pauseBtn.classList.add('btn-success');
+        showNotification('Exercise paused', 'warning');
+    } else {
+        pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+        pauseBtn.classList.remove('btn-success');
+        pauseBtn.classList.add('btn-warning');
+        showNotification('Exercise resumed', 'success');
+    }
+}
+
+function stopExercise() {
+    if (exerciseTimer) {
+        clearInterval(exerciseTimer);
+        exerciseTimer = null;
+    }
+    
+    stopFrameProcessing();
+    exerciseActive = false;
+    exercisePaused = false;
+    frameProcessingActive = false;
+    
+    document.getElementById('startBtn').style.display = 'inline-block';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('pauseBtn').style.display = 'none';
+    document.getElementById('realTimeFeedback').style.display = 'none';
+    document.getElementById('frameStats').style.display = 'none';
+    
+    resetTimer();
+    showNotification('Exercise stopped', 'warning');
+}
+
+function completeExercise() {
+    if (exerciseTimer) {
+        clearInterval(exerciseTimer);
+        exerciseTimer = null;
+    }
+    
+    stopFrameProcessing();
+    
+    const completedTime = exerciseStartTime ? (Date.now() - exerciseStartTime) / 1000 : 0;
+    const targetTime = currentExercise.duration;
+    const completionRate = Math.min(100, (completedTime / targetTime) * 100);
+    const poseAccuracy = totalFramesCount > 0 ? (correctPosesCount / totalFramesCount) * 100 : 0;
+    
+    exerciseActive = false;
+    exercisePaused = false;
+    frameProcessingActive = false;
+    
+    document.getElementById('startBtn').style.display = 'inline-block';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('pauseBtn').style.display = 'none';
+    document.getElementById('realTimeFeedback').style.display = 'none';
+    
+    displayResults(completedTime, completionRate, currentStability, poseAccuracy);
+        saveProgress(completedTime, currentStability);
+    showNotification('Exercise completed! Great job!', 'success');
+}
+
+function displayResults(completedTime, completionRate, avgStability, poseAccuracy) {
+    const results = document.getElementById('exerciseResults');
+    const content = document.getElementById('resultsContent');
+    
+    let feedback = '';
+    let emoji = '';
+    let overallScore = (completionRate * 0.3) + (avgStability * 0.3) + (poseAccuracy * 0.4);
+    
+    if (overallScore >= 85) {
+        feedback = 'Outstanding! Your balance, stability, and pose accuracy are excellent.';
+        emoji = '🎉';
+    } else if (overallScore >= 70) {
+        feedback = 'Great job! You maintained good balance and pose accuracy throughout the exercise.';
+        emoji = '👍';
+    } else if (overallScore >= 50) {
+        feedback = 'Good effort! Keep practicing to improve your balance and pose consistency.';
+        emoji = '💪';
+    } else {
+        feedback = 'Keep working on it! Balance and coordination take time to develop.';
+        emoji = '🌟';
+    }
+    
+    content.innerHTML = `
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">${emoji}</div>
+            <h4 style="margin-bottom: 1rem; color: #ef4444;">Exercise Complete!</h4>
+            
+            <div class="grid grid-4" style="gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #ef4444;">${Math.round(completedTime)}s</div>
+                    <div style="color: #64748b;">Duration</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;">${Math.round(completionRate)}%</div>
+                    <div style="color: #64748b;">Completion</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #3b82f6;">${Math.round(avgStability)}%</div>
+                    <div style="color: #64748b;">Avg Stability</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #f59e0b;">${Math.round(overallScore)}</div>
+                    <div style="color: #64748b;">Overall Score</div>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: #10b981;">${correctPosesCount}</div>
+                    <div style="color: #64748b; font-size: 0.9rem;">Correct Poses</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: #64748b;">${totalFramesCount}</div>
+                    <div style="color: #64748b; font-size: 0.9rem;">Total Frames</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: #3b82f6;">${Math.round(poseAccuracy)}%</div>
+                    <div style="color: #64748b; font-size: 0.9rem;">Pose Accuracy</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: #8b5cf6;">${framesSavedCount}</div>
+                    <div style="color: #64748b; font-size: 0.9rem;">Frames Saved</div>
+                </div>
+            </div>
+            
+            <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem;">${feedback}</p>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <button onclick="getNewExercise()" class="btn btn-primary">Try Another Exercise</button>
+                <button onclick="startExercise()" class="btn btn-success">Repeat Exercise</button>
+            </div>
+        </div>
+    `;
+    
+    results.style.display = 'block';
+}
+
+async function saveProgress(completedTime, avgStability, poseAccuracy) {
+    try {
+        await fetch('/dyspraxia/submit-balance-result', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                exercise_name: currentExercise.name,
+                duration: completedTime,
+                stability: avgStability
+            })
+        });
+    } catch (error) {
+        console.error('Error saving progress:', error);
+    }
+}
+
+function resetTimer() {
+    if (exerciseTimer) {
+        clearInterval(exerciseTimer);
+        exerciseTimer = null;
+    }
+    
+    stopFrameProcessing();
+    
+    if (currentExercise) {
+        timeRemaining = currentExercise.duration;
+        updateTimerDisplay();
+    }
+    
+    // Reset statistics
+    correctPosesCount = 0;
+    totalFramesCount = 0;
+    framesSavedCount = 0;
+    lastPoseCorrect = false;
+    
+    document.getElementById('exerciseResults').style.display = 'none';
+    document.getElementById('frameStats').style.display = 'none';
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    document.getElementById('timer').textContent = display;
+    
+    // Change color based on time remaining
+    const timer = document.getElementById('timer');
+    if (timeRemaining <= 5) {
+        timer.style.color = '#ef4444';
+        // Flash effect for last 5 seconds
+        timer.style.animation = 'pulse 1s infinite';
+    } else if (timeRemaining <= 10) {
+        timer.style.color = '#f59e0b';
+        timer.style.animation = 'none';
+    } else {
+        timer.style.color = '#10b981';
+        timer.style.animation = 'none';
+    }
+}
+
+// Utility function for notifications (assuming it exists in base template)
+function showNotification(message, type) {
+    // Create notification element if it doesn't exist
+    let notification = document.getElementById('notification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        `;
+        document.body.appendChild(notification);
+    }
+    
+    // Set notification style based on type
+    let backgroundColor;
+    switch (type) {
+        case 'success':
+            backgroundColor = '#10b981';
+            break;
+        case 'error':
+            backgroundColor = '#ef4444';
+            break;
+        case 'warning':
+            backgroundColor = '#f59e0b';
+            break;
+        default:
+            backgroundColor = '#3b82f6';
+    }
+    
+    notification.style.backgroundColor = backgroundColor;
+    notification.textContent = message;
+    notification.style.transform = 'translateX(0)';
+    
+    // Auto-hide after 4 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(400px)';
+    }, 4000);
+}
+
+// Initialize with first exercise
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-start with easy difficulty
+    setDifficulty('easy');
+});
+
+// Add CSS for pulse animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .grid {
+        display: grid;
+    }
+    
+    .grid-2 {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    
+    .grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    @media (max-width: 768px) {
+        .grid-2, .grid-3, .grid-4 {
+            grid-template-columns: 1fr;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Doctor Signup</h2>
+<form method="post">
+    <input type="text" name="name" placeholder="Name" required><br>
+    <input type="email" name="email" placeholder="Email" required><br>
+    <input type="password" name="password" placeholder="Password" required><br>
+    <input type="text" name="specialization" placeholder="Specialization" required><br>
+    <button type="submit">Sign Up</button>
+</form>
+<p>Already have an account? <a href="{{ url_for('doctor.login') }}">Login</a></p>
+{% endblock %}

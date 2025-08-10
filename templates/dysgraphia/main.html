@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Dysgraphia Support - Learning Platform{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">✍️ Dysgraphia Support Center</h1>
+        <p style="color: #64748b;">Tools and activities to improve writing skills and handwriting</p>
+    </div>
+</div>
+
+<div class="grid grid-3">
+    <div class="card dysgraphia-bg">
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-pen-fancy dysgraphia-color" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 1rem;">Writing Practice</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">Guided writing exercises with analysis</p>
+            <a href="/dysgraphia/writing-practice" class="btn btn-warning" style="width: 100%;">Start Writing</a>
+        </div>
+    </div>
+    
+    <div class="card dysgraphia-bg">
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-font dysgraphia-color" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 1rem;">Letter Practice</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">Letter formation and handwriting practice</p>
+            <a href="/dysgraphia/letter-practice" class="btn btn-warning" style="width: 100%;">Practice Letters</a>
+        </div>
+    </div>
+    
+    <div class="card dysgraphia-bg">
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-lightbulb dysgraphia-color" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 1rem;">Writing Prompts</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">Creative writing prompts and ideas</p>
+            <a href="/dysgraphia/writing-prompts" class="btn btn-warning" style="width: 100%;">Get Inspired</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">About Dysgraphia Support</h3>
+    </div>
+    
+    <div class="grid grid-2">
+        <div>
+            <h4 style="margin-bottom: 1rem; color: #f59e0b;">What is Dysgraphia?</h4>
+            <p style="color: #64748b; line-height: 1.8; margin-bottom: 1.5rem;">
+                Dysgraphia is a learning disability that affects writing abilities. It can impact handwriting, 
+                spelling, and the ability to put thoughts on paper. Our platform provides tools to help 
+                improve writing skills through guided practice, analysis, and structured exercises.
+            </p>
+            
+            <h4 style="margin-bottom: 1rem; color: #f59e0b;">How We Help</h4>
+            <ul style="color: #64748b; line-height: 1.8;">
+                <li>Writing analysis for common mistakes</li>
+                <li>Letter formation guidance</li>
+                <li>Structured writing prompts</li>
+                <li>Progress tracking for improvement</li>
+                <li>Spelling and grammar assistance</li>
+            </ul>
+        </div>
+        
+        <div>
+            <h4 style="margin-bottom: 1rem; color: #f59e0b;">Features Available</h4>
+            <div style="display: grid; gap: 1rem;">
+                <div style="padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <strong>Writing Analysis</strong>
+                    <p style="color: #64748b; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                        AI-powered analysis of writing samples for common dysgraphia patterns
+                    </p>
+                </div>
+                
+                <div style="padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <strong>Letter Formation</strong>
+                    <p style="color: #64748b; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                        Step-by-step guidance for proper letter formation and handwriting
+                    </p>
+                </div>
+                
+                <div style="padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <strong>Creative Prompts</strong>
+                    <p style="color: #64748b; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                        Engaging writing prompts to encourage creative expression
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

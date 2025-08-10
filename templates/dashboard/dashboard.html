@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Cogno Solution{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold dyslexic-font mb-2">📊 Welcome back, {{ user.username }}!</h1>
+        <p class="text-xl text-gray-600">Track your reading progress and game achievements</p>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="grid md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center">
+                <div class="text-3xl mr-4">📚</div>
+                <div>
+                    <p class="text-sm text-gray-600">Total Sessions</p>
+                    <p id="totalSessions" class="text-2xl font-bold text-dyslexia-blue">-</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center">
+                <div class="text-3xl mr-4">⏱️</div>
+                <div>
+                    <p class="text-sm text-gray-600">Time Spent</p>
+                    <p id="totalTime" class="text-2xl font-bold text-dyslexia-green">-</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center">
+                <div class="text-3xl mr-4">🚀</div>
+                <div>
+                    <p class="text-sm text-gray-600">Reading Speed</p>
+                    <p id="avgReadingSpeed" class="text-2xl font-bold text-dyslexia-yellow">-</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center">
+                <div class="text-3xl mr-4">🎯</div>
+                <div>
+                    <p class="text-sm text-gray-600">This Week</p>
+                    <p id="weeklyProgress" class="text-2xl font-bold text-purple-600">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="grid lg:grid-cols-2 gap-8 mb-8">
+        <!-- Reading Progress Chart -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-bold mb-4">📈 Reading Progress</h3>
+            <canvas id="readingProgressChart" width="400" height="200"></canvas>
+        </div>
+        
+        <!-- Game Scores Chart -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-bold mb-4">🎮 Game Performance</h3>
+            <canvas id="gameScoresChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+    
+    <!-- Recommendations and Recent Activity -->
+    <div class="grid lg:grid-cols-2 gap-8">
+        <!-- Recommendations -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-bold mb-4">💡 Recommended Activities</h3>
+            <div id="recommendations" class="space-y-4">
+                <div class="animate-pulse">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-bold mb-4">📋 Recent Activity</h3>
+            <div id="recentActivity" class="space-y-3">
+                <div class="animate-pulse">
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

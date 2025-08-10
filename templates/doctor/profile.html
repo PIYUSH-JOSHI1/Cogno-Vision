@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-xl mx-auto mt-10">
+  <div class="card bg-white shadow-lg rounded-lg p-8 border border-dyslexia-blue/20">
+    <div class="flex items-center gap-4 mb-6">
+      <div class="bg-dyslexia-blue/10 rounded-full p-4">
+        <i class="fa-solid fa-user-md text-3xl text-dyslexia-blue"></i>
+      </div>
+      <div>
+        <h2 class="text-2xl font-bold text-dyslexia-blue mb-1">Doctor Profile</h2>
+        <p class="text-gray-500">Manage your information</p>
+      </div>
+    </div>
+    {% if doctor %}
+      <div class="mb-4">
+        <span class="font-semibold">Name:</span> {{ doctor.name }}
+      </div>
+      <div class="mb-4">
+        <span class="font-semibold">Email:</span> {{ doctor.email }}
+      </div>
+      <div class="mb-4">
+        <span class="font-semibold">Specialization:</span> {{ doctor.specialization }}
+      </div>
+    {% else %}
+      <p class="text-red-500">Doctor profile not found.</p>
+    {% endif %}
+    <a href="/auth/logout" class="btn btn-danger mt-6">Logout</a>
+  </div>
+</div>
+{% endblock %}

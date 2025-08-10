@@ -1,0 +1,778 @@
+{% extends "base.html" %}
+
+{% block title %}Letter Practice - Dysgraphia Support{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">🔤 Letter Formation Practice</h1>
+        <p style="color: #64748b;">Practice proper letter formation with step-by-step guidance</p>
+    </div>
+    
+    <!-- Letter Selection -->
+    <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h4 style="margin-bottom: 1rem;">Choose a Letter to Practice</h4>
+        
+        <!-- Alphabet Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); gap: 0.5rem; margin-bottom: 1rem;">
+            <script>
+                for (let i = 97; i <= 122; i++) {
+                    const letter = String.fromCharCode(i);
+                    document.write(`
+                        <button onclick="selectLetter('${letter}')" class="btn btn-primary letter-btn" 
+                                style="padding: 1rem; font-size: 1.5rem; font-weight: bold;">
+                            ${letter.toUpperCase()}
+                        </button>
+                    `);
+                }
+            </script>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <select id="practiceMode" class="form-input" style="max-width: 200px;">
+                <option value="trace">Trace Letters</option>
+                <option value="copy">Copy Letters</option>
+                <option value="words">Practice Words</option>
+            </select>
+            
+            <button onclick="getRandomLetter()" class="btn btn-success">
+                <i class="fas fa-random"></i> Random Letter
+            </button>
+        </div>
+    </div>
+    
+    <!-- Letter Practice Area -->
+    <div class="card" id="practiceArea" style="display: none;">
+        <div class="card-header">
+            <h3 class="card-title" id="practiceTitle">Letter Practice</h3>
+            <div style="display: flex; gap: 1rem;">
+                <button onclick="playLetterSound()" id="soundBtn" class="btn btn-warning">
+                    <i class="fas fa-volume-up"></i> Play Sound
+                </button>
+                <button onclick="nextExercise()" class="btn btn-success">
+                    <i class="fas fa-forward"></i> Next
+                </button>
+            </div>
+        </div>
+        
+        <div class="grid grid-2">
+            <!-- Letter Display -->
+            <div style="text-align: center; padding: 2rem;">
+                <div id="letterDisplay" style="font-size: 8rem; font-weight: bold; color: #f59e0b; margin-bottom: 1rem;">
+                    A
+                </div>
+                
+                <div id="letterInfo" style="background: #fef3c7; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <h4 style="color: #92400e; margin-bottom: 1rem;">Formation Guide</h4>
+                    <p id="formationGuide" style="color: #1f2937; font-size: 1.1rem; line-height: 1.6;">
+                        Select a letter to see formation instructions
+                    </p>
+                </div>
+                
+                <div id="practiceWords" style="background: #f0f9ff; padding: 1rem; border-radius: 8px;">
+                    <h5 style="color: #1e40af; margin-bottom: 0.5rem;">Practice Words</h5>
+                    <div id="wordsList" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <!-- Words will be populated here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Practice Canvas -->
+            <div style="text-align: center;">
+                <h4 style="margin-bottom: 1rem;">Practice Area</h4>
+                
+                <div style="position: relative; display: inline-block; background: white; border: 2px solid #e2e8f0; border-radius: 8px;">
+                    <canvas id="practiceCanvas" width="400" height="300" 
+                            style="cursor: crosshair; display: block;"></canvas>
+                    
+                    <!-- Guidelines -->
+                    <div id="guidelines" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                        <!-- Guidelines will be drawn here -->
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="clearCanvas()" class="btn btn-danger">
+                        <i class="fas fa-eraser"></i> Clear
+                    </button>
+                    <button onclick="showGuide()" class="btn btn-primary" id="guideBtn">
+                        <i class="fas fa-eye"></i> Show Guide
+                    </button>
+                    <button onclick="checkWriting()" class="btn btn-success">
+                        <i class="fas fa-check"></i> Check Writing
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Progress Display -->
+        <div id="progressDisplay" style="padding: 1rem; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span id="currentLetter">Current: -</span>
+                    <span style="margin-left: 2rem;" id="practiceCount">Practice: 0/5</span>
+                </div>
+                <div id="qualityFeedback" style="font-weight: 500;">
+                    Start practicing to get feedback
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Letter Games Section -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">🎮 Letter Games</h3>
+            <p style="color: #64748b;">Fun games to reinforce letter recognition and formation</p>
+        </div>
+        
+        <div class="grid grid-2">
+            <div class="card dysgraphia-bg">
+                <div style="text-align: center; padding: 1.5rem;">
+                    <i class="fas fa-sort-alpha-down dysgraphia-color" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h4 style="margin-bottom: 1rem;">Letter Sorting Game</h4>
+                    <p style="color: #64748b; margin-bottom: 1.5rem;">Sort letters into uppercase and lowercase</p>
+                    <button onclick="startLetterSorting()" class="btn btn-warning" style="width: 100%;">
+                        Play Game
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card dysgraphia-bg">
+                <div style="text-align: center; padding: 1.5rem;">
+                    <i class="fas fa-puzzle-piece dysgraphia-color" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h4 style="margin-bottom: 1rem;">Letter Matching Game</h4>
+                    <p style="color: #64748b; margin-bottom: 1.5rem;">Match letters with their sounds</p>
+                    <button onclick="startLetterMatching()" class="btn btn-warning" style="width: 100%;">
+                        Play Game
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Game Modal -->
+<div id="gameModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 12px; padding: 2rem; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3 id="gameTitle">Letter Game</h3>
+            <button onclick="closeGameModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        
+        <div id="gameContent"></div>
+        
+        <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div id="gameScore">Score: 0/10</div>
+            <button id="gameAction" onclick="checkGameAnswer()" class="btn btn-success" style="display: none;">
+                Check Answer
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentLetter = '';
+let practiceCanvas = null;
+let practiceCtx = null;
+let isDrawing = false;
+let practiceCount = 0;
+let maxPractice = 5;
+let showingGuide = false;
+let currentGame = null;
+let gameScore = 0;
+let gameRound = 0;
+let maxGameRounds = 10;
+
+// Letter formation guides
+const letterGuides = {
+    'a': "Start at the top, curve down and around, then add a line down",
+    'b': "Start with a line down, then add two bumps on the right",
+    'c': "Start at the top and curve around like a circle, but don't close it",
+    'd': "Start with a curve, then add a line up and down on the right",
+    'e': "Start in the middle, curve around and add a line across",
+    'f': "Start with a line down, then add two lines across",
+    'g': "Like 'c' but add a tail that goes down and curves left",
+    'h': "Line down, then add a hump on the right",
+    'i': "Line down, then add a dot on top",
+    'j': "Line down with a curve left, then add a dot on top",
+    'k': "Line down, then add two diagonal lines that meet in the middle",
+    'l': "Just a straight line down",
+    'm': "Line down, then add two humps",
+    'n': "Line down, then add one hump",
+    'o': "Make a circle",
+    'p': "Line down, then add a bump at the top",
+    'q': "Make a circle, then add a line down with a small curve",
+    'r': "Line down, then add a small curve at the top",
+    's': "Curve like a snake - start at top, curve right, then left, then right",
+    't': "Line down, then add a line across near the top",
+    'u': "Curve down and up, then add a line down",
+    'v': "Two diagonal lines that meet at the bottom",
+    'w': "Like 'v' but do it twice - four lines total",
+    'x': "Two diagonal lines that cross in the middle",
+    'y': "Two diagonal lines that meet, then one continues down",
+    'z': "Line across the top, diagonal down, line across the bottom"
+};
+
+// Practice words for each letter
+const practiceWords = {
+    'a': ['cat', 'hat', 'bat', 'mat', 'rat'],
+    'b': ['ball', 'book', 'bird', 'boat', 'bear'],
+    'c': ['car', 'cat', 'cup', 'cake', 'coat'],
+    'd': ['dog', 'duck', 'door', 'doll', 'desk'],
+    'e': ['egg', 'elephant', 'eye', 'ear', 'eat'],
+    'f': ['fish', 'frog', 'fire', 'flag', 'foot'],
+    'g': ['goat', 'girl', 'game', 'gate', 'gift'],
+    'h': ['hat', 'house', 'horse', 'hand', 'heart'],
+    'i': ['ice', 'ink', 'insect', 'island', 'igloo'],
+    'j': ['jump', 'jar', 'juice', 'jacket', 'jewel'],
+    'k': ['kite', 'key', 'king', 'kitchen', 'knee'],
+    'l': ['lion', 'lamp', 'leaf', 'lock', 'love'],
+    'm': ['moon', 'mouse', 'milk', 'money', 'music'],
+    'n': ['nose', 'nest', 'night', 'number', 'name'],
+    'o': ['owl', 'ocean', 'orange', 'open', 'over'],
+    'p': ['pig', 'pen', 'paper', 'pizza', 'park'],
+    'q': ['queen', 'quiet', 'quick', 'question', 'quilt'],
+    'r': ['rabbit', 'rain', 'red', 'rock', 'run'],
+    's': ['sun', 'snake', 'star', 'smile', 'song'],
+    't': ['tree', 'table', 'tiger', 'toy', 'time'],
+    'u': ['umbrella', 'under', 'up', 'use', 'uncle'],
+    'v': ['van', 'violin', 'voice', 'very', 'visit'],
+    'w': ['water', 'window', 'wind', 'word', 'work'],
+    'x': ['box', 'fox', 'six', 'mix', 'wax'],
+    'y': ['yellow', 'yes', 'yard', 'year', 'young'],
+    'z': ['zoo', 'zero', 'zip', 'zone', 'zebra']
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    practiceCanvas = document.getElementById('practiceCanvas');
+    practiceCtx = practiceCanvas.getContext('2d');
+    
+    setupCanvas();
+    drawGuidelines();
+});
+
+function setupCanvas() {
+    practiceCtx.lineWidth = 3;
+    practiceCtx.lineCap = 'round';
+    practiceCtx.strokeStyle = '#1f2937';
+    
+    // Mouse events
+    practiceCanvas.addEventListener('mousedown', startDrawing);
+    practiceCanvas.addEventListener('mousemove', draw);
+    practiceCanvas.addEventListener('mouseup', stopDrawing);
+    practiceCanvas.addEventListener('mouseout', stopDrawing);
+    
+    // Touch events for mobile
+    practiceCanvas.addEventListener('touchstart', handleTouch);
+    practiceCanvas.addEventListener('touchmove', handleTouch);
+    practiceCanvas.addEventListener('touchend', stopDrawing);
+}
+
+function startDrawing(e) {
+    isDrawing = true;
+    draw(e);
+}
+
+function draw(e) {
+    if (!isDrawing) return;
+    
+    const rect = practiceCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    practiceCtx.lineTo(x, y);
+    practiceCtx.stroke();
+    practiceCtx.beginPath();
+    practiceCtx.moveTo(x, y);
+}
+
+function stopDrawing() {
+    if (isDrawing) {
+        isDrawing = false;
+        practiceCtx.beginPath();
+    }
+}
+
+function handleTouch(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                     e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    practiceCanvas.dispatchEvent(mouseEvent);
+}
+
+function drawGuidelines() {
+    const ctx = practiceCtx;
+    const width = practiceCanvas.width;
+    const height = practiceCanvas.height;
+    
+    ctx.save();
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]);
+    
+    // Horizontal guidelines
+    const lineSpacing = height / 4;
+    for (let i = 1; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * lineSpacing);
+        ctx.lineTo(width, i * lineSpacing);
+        ctx.stroke();
+    }
+    
+    // Vertical center line
+    ctx.beginPath();
+    ctx.moveTo(width / 2, 0);
+    ctx.lineTo(width / 2, height);
+    ctx.stroke();
+    
+    ctx.restore();
+}
+
+function selectLetter(letter) {
+    currentLetter = letter;
+    practiceCount = 0;
+    
+    document.getElementById('practiceArea').style.display = 'block';
+    document.getElementById('letterDisplay').textContent = letter.toUpperCase();
+    document.getElementById('practiceTitle').textContent = `Letter ${letter.toUpperCase()} Practice`;
+    document.getElementById('formationGuide').textContent = letterGuides[letter] || 'Practice this letter carefully';
+    document.getElementById('currentLetter').textContent = `Current: ${letter.toUpperCase()}`;
+    
+    // Update practice words
+    const wordsList = document.getElementById('wordsList');
+    const words = practiceWords[letter] || [];
+    wordsList.innerHTML = words.map(word => 
+        `<span style="background: #dbeafe; color: #1e40af; padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 500;">${word}</span>`
+    ).join('');
+    
+    updateProgress();
+    clearCanvas();
+    
+    // Highlight selected letter button
+    document.querySelectorAll('.letter-btn').forEach(btn => {
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-primary');
+    });
+    
+    event.target.classList.remove('btn-primary');
+    event.target.classList.add('btn-success');
+}
+
+function getRandomLetter() {
+    const letters = 'abcdefghijklmnopqrstuvwxyz';
+    const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+    selectLetter(randomLetter);
+}
+
+function playLetterSound() {
+    if (!currentLetter) return;
+    
+    // Use Web Speech API to pronounce the letter
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(currentLetter);
+        utterance.rate = 0.7;
+        utterance.pitch = 1.2;
+        speechSynthesis.speak(utterance);
+        
+        // Also spell out the letter sound
+        setTimeout(() => {
+            const soundUtterance = new SpeechSynthesisUtterance(`The letter ${currentLetter} says ${getLetterSound(currentLetter)}`);
+            soundUtterance.rate = 0.8;
+            speechSynthesis.speak(soundUtterance);
+        }, 1500);
+    } else {
+        showNotification('Speech synthesis not supported in this browser', 'warning');
+    }
+}
+
+function getLetterSound(letter) {
+    const sounds = {
+        'a': 'ah', 'b': 'buh', 'c': 'kuh', 'd': 'duh', 'e': 'eh',
+        'f': 'fuh', 'g': 'guh', 'h': 'huh', 'i': 'ih', 'j': 'juh',
+        'k': 'kuh', 'l': 'luh', 'm': 'muh', 'n': 'nuh', 'o': 'oh',
+        'p': 'puh', 'q': 'kwuh', 'r': 'ruh', 's': 'suh', 't': 'tuh',
+        'u': 'uh', 'v': 'vuh', 'w': 'wuh', 'x': 'ks', 'y': 'yuh', 'z': 'zuh'
+    };
+    return sounds[letter] || letter;
+}
+
+function clearCanvas() {
+    practiceCtx.clearRect(0, 0, practiceCanvas.width, practiceCanvas.height);
+    drawGuidelines();
+    if (showingGuide) {
+        drawLetterGuide();
+    }
+}
+
+function showGuide() {
+    showingGuide = !showingGuide;
+    const btn = document.getElementById('guideBtn');
+    
+    if (showingGuide) {
+        drawLetterGuide();
+        btn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Guide';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-warning');
+    } else {
+        clearCanvas();
+        btn.innerHTML = '<i class="fas fa-eye"></i> Show Guide';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-primary');
+    }
+}
+
+function drawLetterGuide() {
+    if (!currentLetter) return;
+    
+    const ctx = practiceCtx;
+    ctx.save();
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([10, 5]);
+    
+    // Simple letter outlines (simplified for demo)
+    const centerX = practiceCanvas.width / 2;
+    const centerY = practiceCanvas.height / 2;
+    const size = 80;
+    
+    ctx.font = `${size}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.strokeText(currentLetter.toUpperCase(), centerX, centerY);
+    
+    ctx.restore();
+}
+
+function checkWriting() {
+    if (!currentLetter) {
+        showNotification('Please select a letter first', 'warning');
+        return;
+    }
+    
+    practiceCount++;
+    updateProgress();
+    
+    // Simulate writing quality check
+    const quality = Math.random() * 100;
+    let feedback = '';
+    let color = '';
+    
+    if (quality > 80) {
+        feedback = 'Excellent! Great letter formation!';
+        color = '#10b981';
+    } else if (quality > 60) {
+        feedback = 'Good job! Keep practicing to improve.';
+        color = '#f59e0b';
+    } else {
+        feedback = 'Keep trying! Focus on the formation guide.';
+        color = '#ef4444';
+    }
+    
+    document.getElementById('qualityFeedback').textContent = feedback;
+    document.getElementById('qualityFeedback').style.color = color;
+    
+    showNotification(feedback, quality > 60 ? 'success' : 'warning');
+    
+    if (practiceCount >= maxPractice) {
+        setTimeout(() => {
+            showNotification('Great practice session! Try another letter.', 'success');
+            practiceCount = 0;
+            updateProgress();
+        }, 2000);
+    }
+}
+
+function nextExercise() {
+    const letters = 'abcdefghijklmnopqrstuvwxyz';
+    const currentIndex = letters.indexOf(currentLetter);
+    const nextIndex = (currentIndex + 1) % letters.length;
+    selectLetter(letters[nextIndex]);
+}
+
+function updateProgress() {
+    document.getElementById('practiceCount').textContent = `Practice: ${practiceCount}/${maxPractice}`;
+}
+
+// Letter Games
+function startLetterSorting() {
+    currentGame = 'sorting';
+    gameScore = 0;
+    gameRound = 0;
+    
+    document.getElementById('gameTitle').textContent = 'Letter Sorting Game';
+    document.getElementById('gameModal').style.display = 'block';
+    
+    displaySortingGame();
+}
+
+function startLetterMatching() {
+    currentGame = 'matching';
+    gameScore = 0;
+    gameRound = 0;
+    
+    document.getElementById('gameTitle').textContent = 'Letter Matching Game';
+    document.getElementById('gameModal').style.display = 'block';
+    
+    displayMatchingGame();
+}
+
+function displaySortingGame() {
+    const letters = ['A', 'b', 'C', 'd', 'E', 'f', 'G', 'h', 'I', 'j'];
+    const shuffled = letters.sort(() => Math.random() - 0.5);
+    
+    document.getElementById('gameContent').innerHTML = `
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h4>Sort the letters into uppercase and lowercase</h4>
+            <p style="color: #64748b;">Drag letters to the correct box</p>
+        </div>
+        
+        <div style="margin-bottom: 2rem;">
+            <h5>Letters to Sort:</h5>
+            <div id="letterPool" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; padding: 1rem; background: #f8fafc; border-radius: 8px; min-height: 80px;">
+                ${shuffled.map(letter => `
+                    <div class="sortable-letter" draggable="true" data-letter="${letter}" 
+                         style="padding: 1rem; background: white; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 2rem; font-weight: bold; cursor: move;">
+                        ${letter}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <div class="grid grid-2" style="gap: 2rem;">
+            <div class="drop-zone" data-type="uppercase" 
+                 style="padding: 2rem; background: #dbeafe; border: 3px dashed #3b82f6; border-radius: 8px; text-align: center; min-height: 150px;">
+                <h5 style="color: #1e40af; margin-bottom: 1rem;">UPPERCASE</h5>
+                <div class="drop-area" style="min-height: 100px;"></div>
+            </div>
+            
+            <div class="drop-zone" data-type="lowercase" 
+                 style="padding: 2rem; background: #d1fae5; border: 3px dashed #10b981; border-radius: 8px; text-align: center; min-height: 150px;">
+                <h5 style="color: #065f46; margin-bottom: 1rem;">lowercase</h5>
+                <div class="drop-area" style="min-height: 100px;"></div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('gameAction').style.display = 'inline-block';
+    document.getElementById('gameAction').textContent = 'Check Sorting';
+    document.getElementById('gameScore').textContent = `Round: ${gameRound + 1}/5`;
+    
+    setupDragAndDrop();
+}
+
+function displayMatchingGame() {
+    const letterPairs = [
+        { letter: 'A', sound: 'Apple' },
+        { letter: 'B', sound: 'Ball' },
+        { letter: 'C', sound: 'Cat' },
+        { letter: 'D', sound: 'Dog' },
+        { letter: 'E', sound: 'Elephant' }
+    ];
+    
+    const currentPair = letterPairs[gameRound % letterPairs.length];
+    const options = [currentPair.sound, 'Bird', 'Fish', 'Tree'].sort(() => Math.random() - 0.5);
+    
+    document.getElementById('gameContent').innerHTML = `
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h4>Match the letter with the word that starts with it</h4>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="font-size: 6rem; font-weight: bold; color: #f59e0b; margin-bottom: 1rem;">
+                ${currentPair.letter}
+            </div>
+            <button onclick="playLetterSoundGame('${currentPair.letter.toLowerCase()}')" class="btn btn-warning">
+                <i class="fas fa-volume-up"></i> Play Sound
+            </button>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            ${options.map((option, index) => `
+                <button onclick="selectMatchingAnswer('${option}', '${currentPair.sound}')" 
+                        class="btn btn-primary matching-option" 
+                        style="padding: 2rem; font-size: 1.2rem;">
+                    ${option}
+                </button>
+            `).join('')}
+        </div>
+    `;
+    
+    document.getElementById('gameAction').style.display = 'none';
+    document.getElementById('gameScore').textContent = `Score: ${gameScore}/${maxGameRounds}`;
+}
+
+function playLetterSoundGame(letter) {
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(`${letter}`);
+        utterance.rate = 0.8;
+        speechSynthesis.speak(utterance);
+    }
+}
+
+function selectMatchingAnswer(selected, correct) {
+    const buttons = document.querySelectorAll('.matching-option');
+    buttons.forEach(btn => btn.disabled = true);
+    
+    if (selected === correct) {
+        gameScore++;
+        showNotification('Correct! Well done!', 'success');
+        event.target.style.background = '#10b981';
+    } else {
+        showNotification(`Not quite. The correct answer was ${correct}`, 'warning');
+        event.target.style.background = '#ef4444';
+        // Highlight correct answer
+        buttons.forEach(btn => {
+            if (btn.textContent === correct) {
+                btn.style.background = '#10b981';
+            }
+        });
+    }
+    
+    gameRound++;
+    
+    setTimeout(() => {
+        if (gameRound >= maxGameRounds) {
+            showGameResults();
+        } else {
+            displayMatchingGame();
+        }
+    }, 2000);
+}
+
+function setupDragAndDrop() {
+    const letters = document.querySelectorAll('.sortable-letter');
+    const dropZones = document.querySelectorAll('.drop-zone');
+    
+    letters.forEach(letter => {
+        letter.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', e.target.dataset.letter);
+        });
+    });
+    
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.style.background = zone.dataset.type === 'uppercase' ? '#bfdbfe' : '#a7f3d0';
+        });
+        
+        zone.addEventListener('dragleave', (e) => {
+            zone.style.background = zone.dataset.type === 'uppercase' ? '#dbeafe' : '#d1fae5';
+        });
+        
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const letter = e.dataTransfer.getData('text/plain');
+            const letterElement = document.querySelector(`[data-letter="${letter}"]`);
+            
+            if (letterElement) {
+                zone.querySelector('.drop-area').appendChild(letterElement);
+                letterElement.style.margin = '0.5rem';
+            }
+            
+            zone.style.background = zone.dataset.type === 'uppercase' ? '#dbeafe' : '#d1fae5';
+        });
+    });
+}
+
+function checkGameAnswer() {
+    if (currentGame === 'sorting') {
+        checkSortingAnswer();
+    }
+}
+
+function checkSortingAnswer() {
+    const uppercaseZone = document.querySelector('[data-type="uppercase"] .drop-area');
+    const lowercaseZone = document.querySelector('[data-type="lowercase"] .drop-area');
+    
+    const uppercaseLetters = Array.from(uppercaseZone.children).map(el => el.dataset.letter);
+    const lowercaseLetters = Array.from(lowercaseZone.children).map(el => el.dataset.letter);
+    
+    let correct = 0;
+    let total = uppercaseLetters.length + lowercaseLetters.length;
+    
+    uppercaseLetters.forEach(letter => {
+        if (letter === letter.toUpperCase()) correct++;
+    });
+    
+    lowercaseLetters.forEach(letter => {
+        if (letter === letter.toLowerCase()) correct++;
+    });
+    
+    gameScore += correct;
+    gameRound++;
+    
+    const percentage = Math.round((correct / total) * 100);
+    showNotification(`Round complete! You got ${correct}/${total} correct (${percentage}%)`, 
+                    percentage >= 70 ? 'success' : 'warning');
+    
+    if (gameRound >= 5) {
+        setTimeout(showGameResults, 2000);
+    } else {
+        setTimeout(displaySortingGame, 3000);
+    }
+}
+
+function showGameResults() {
+    const maxScore = currentGame === 'sorting' ? 50 : maxGameRounds;
+    const percentage = Math.round((gameScore / maxScore) * 100);
+    
+    let feedback = '';
+    let emoji = '';
+    
+    if (percentage >= 80) {
+        feedback = 'Excellent work! You have great letter recognition skills!';
+        emoji = '🎉';
+    } else if (percentage >= 60) {
+        feedback = 'Good job! Keep practicing to improve further.';
+        emoji = '👍';
+    } else {
+        feedback = 'Nice try! Letter recognition takes practice. Keep it up!';
+        emoji = '💪';
+    }
+    
+    document.getElementById('gameContent').innerHTML = `
+        <div style="text-align: center;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">${emoji}</div>
+            <h4 style="margin-bottom: 2rem; color: #f59e0b;">Game Complete!</h4>
+            
+            <div class="grid grid-2" style="gap: 2rem; margin-bottom: 2rem;">
+                <div>
+                    <div style="font-size: 2rem; font-weight: bold; color: #f59e0b;">${gameScore}</div>
+                    <div style="color: #64748b;">Final Score</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: bold; color: #10b981;">${percentage}%</div>
+                    <div style="color: #64748b;">Accuracy</div>
+                </div>
+            </div>
+            
+            <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem;">${feedback}</p>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button onclick="startLetterSorting()" class="btn btn-primary">Play Sorting Again</button>
+                <button onclick="startLetterMatching()" class="btn btn-success">Play Matching Game</button>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('gameAction').style.display = 'none';
+}
+
+function closeGameModal() {
+    document.getElementById('gameModal').style.display = 'none';
+    currentGame = null;
+}
+
+// Close modal when clicking outside
+document.getElementById('gameModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeGameModal();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}Camera Exercises - Dyspraxia Support{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">📹 Camera-Based Movement Exercises</h1>
+        <p style="color: #64748b;">Use your camera to practice movement and get real-time feedback</p>
+    </div>
+    
+    <!-- Camera Permission Notice -->
+    <div id="cameraNotice" class="alert alert-warning">
+        <i class="fas fa-camera"></i>
+        <strong>Camera Access Required:</strong> This feature needs access to your camera to track your movements. 
+        Click "Start Camera" to begin.
+    </div>
+    
+    <!-- Camera Controls -->
+    <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <button onclick="startCamera()" id="startCameraBtn" class="btn btn-success">
+                <i class="fas fa-video"></i> Start Camera
+            </button>
+            <button onclick="stopCamera()" id="stopCameraBtn" class="btn btn-danger" style="display: none;">
+                <i class="fas fa-video-slash"></i> Stop Camera
+            </button>
+            <button onclick="startExercise()" id="startExerciseBtn" class="btn btn-primary" style="display: none;">
+                <i class="fas fa-play"></i> Start Exercise
+            </button>
+            <div id="cameraStatus" style="color: #64748b; font-weight: 500;"></div>
+        </div>
+    </div>
+    
+    <!-- Video Display -->
+    <div class="grid grid-2" style="gap: 2rem;">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Live Camera Feed</h3>
+            </div>
+            <div style="position: relative; background: #000; border-radius: 8px; overflow: hidden;">
+                <video id="videoElement" width="100%" height="300" style="display: block;" autoplay muted></video>
+                <canvas id="overlayCanvas" width="640" height="480" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
+                <div id="noCamera" style="display: flex; align-items: center; justify-content: center; height: 300px; color: #64748b; background: #f8fafc;">
+                    <div style="text-align: center;">
+                        <i class="fas fa-camera-retro" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>Camera not active</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Exercise Instructions</h3>
+            </div>
+            <div id="exerciseInstructions" style="padding: 1.5rem;">
+                <div style="text-align: center; color: #64748b;">
+                    <i class="fas fa-hand-paper" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p>Start camera to see exercise instructions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Movement Feedback -->
+    <div class="card" id="feedbackCard" style="display: none;">
+        <div class="card-header">
+            <h3 class="card-title">Movement Feedback</h3>
+        </div>
+        <div id="movementFeedback" style="padding: 1.5rem;">
+            <!-- Real-time feedback will appear here -->
+        </div>
+    </div>
+    
+    <!-- Exercise Results -->
+    <div class="card" id="resultsCard" style="display: none;">
+        <div class="card-header">
+            <h3 class="card-title">Exercise Results</h3>
+        </div>
+        <div id="exerciseResults" style="padding: 1.5rem;">
+            <!-- Results will appear here -->
+        </div>
+    </div>
+</div>
+
+<!-- Exercise Selection Modal -->
+<div id="exerciseModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 95%;">
+        <h3 style="margin-bottom: 2rem;">Choose an Exercise</h3>
+        <div id="exerciseList" style="display: grid; gap: 1rem;"></div>
+        <div style="margin-top: 2rem; text-align: center;">
+            <button onclick="closeExerciseModal()" class="btn btn-danger">Cancel</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+// --- Exercise Data (should match backend) ---
+const EXERCISES = [
+    {
+        name: 'Arm Raise',
+        movement: 'arm_raise',
+        description: 'Raise both arms above your head and hold for 5 seconds.',
+        instructions: 'Stand straight, raise both arms overhead, and keep them straight.',
+        image: 'https://versusarthritis.org/media/23268/arm-lifts-500x570.jpg'
+    },
+    {
+        name: 'Side Step',
+        movement: 'side_step',
+        description: 'Step to the side and back, repeat for 10 seconds.',
+        instructions: 'Step to your right, then left, keeping your body upright.',
+        image: 'https://liftmanual.com/wp-content/uploads/2023/04/resistance-band-side-walk.jpg'
+    },
+    {
+        name: 'March in Place',
+        movement: 'march_in_place',
+        description: 'March in place, lifting knees high for 10 seconds.',
+        instructions: 'Lift each knee high as you march in place.',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGO3h4zQa3utIiTWKPP2oNitqpE8JkvBFg-A&s'
+    },
+    {
+        name: 'Squat Hold',
+        movement: 'squat_hold',
+        description: 'Hold a squat position for 8 seconds.',
+        instructions: 'Bend your knees and lower your hips as if sitting, hold.',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFH5m9demy6NrMqSM76931HDohu42Vpns0gw&s'
+    },
+    {
+        name: 'Torso Twist',
+        movement: 'torso_twist',
+        description: 'Twist your torso left and right for 10 seconds.',
+        instructions: 'Stand straight, twist your upper body left and right.',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFfrc8PewlQ5EWu60TVaxkVoMEp4g7esOuaA&s'
+    },
+    {
+        name: 'Jumping Jacks',
+        movement: 'jumping_jacks',
+        description: 'Do jumping jacks for 10 seconds.',
+        instructions: 'Jump with legs apart and arms overhead, then return.',
+        image: 'https://www.wikihow.com/images/thumb/d/d2/Perform-Jumping-Jacks-Step-5-Version-4.jpg/v4-460px-Perform-Jumping-Jacks-Step-5-Version-4.jpg'
+    },
+    {
+        name: 'Heel Walk',
+        movement: 'heel_walk',
+        description: 'Walk on your heels for 8 seconds.',
+        instructions: 'Lift your toes and walk forward on your heels.',
+        image: 'https://library.sheffieldchildrens.nhs.uk/wp-content/uploads/2022/01/heel-walking-300x247.jpg'
+    },
+    {
+        name: 'Balance Reach',
+        movement: 'balance_reach',
+        description: 'Stand on one foot and reach forward for 6 seconds.',
+        instructions: 'Balance on one foot, reach forward with both hands.',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOFFknFE8Ff_RdqQq2btDpKrMh6ss0eljNqg&s'
+    }
+];
+
+let videoStream = null;
+let videoElement = null;
+let canvas = null;
+let ctx = null;
+let selectedExercise = null;
+let exerciseActive = false;
+let detectionInterval = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    videoElement = document.getElementById('videoElement');
+    canvas = document.getElementById('overlayCanvas');
+    ctx = canvas.getContext('2d');
+});
+
+async function startCamera() {
+    try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: 640, 
+                height: 480,
+                facingMode: 'user'
+            } 
+        });
+        videoElement.srcObject = videoStream;
+        videoElement.style.display = 'block';
+        document.getElementById('noCamera').style.display = 'none';
+        document.getElementById('startCameraBtn').style.display = 'none';
+        document.getElementById('stopCameraBtn').style.display = 'inline-block';
+        document.getElementById('startExerciseBtn').style.display = 'inline-block';
+        document.getElementById('cameraStatus').textContent = 'Camera active';
+        document.getElementById('cameraNotice').style.display = 'none';
+        showNotification('Camera started successfully!', 'success');
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        showNotification('Could not access camera. Please check permissions.', 'error');
+        document.getElementById('cameraStatus').textContent = 'Camera access denied';
+    }
+}
+
+function stopCamera() {
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+    }
+    videoElement.style.display = 'none';
+    document.getElementById('noCamera').style.display = 'flex';
+    document.getElementById('startCameraBtn').style.display = 'inline-block';
+    document.getElementById('stopCameraBtn').style.display = 'none';
+    document.getElementById('startExerciseBtn').style.display = 'none';
+    document.getElementById('cameraStatus').textContent = 'Camera stopped';
+    stopExercise();
+    showNotification('Camera stopped', 'warning');
+}
+
+function startExercise() {
+    if (!videoStream) {
+        showNotification('Please start camera first', 'warning');
+        return;
+    }
+    // Populate exercise list
+    const list = document.getElementById('exerciseList');
+    list.innerHTML = '';
+    EXERCISES.forEach((ex, idx) => {
+        list.innerHTML += `
+        <button onclick="selectExercise(${idx})" class="btn btn-primary" style="padding: 1rem; text-align: left; display: flex; align-items: center; gap: 1rem;">
+            <img src="${ex.image}" alt="${ex.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 2px solid #e5e7eb;">
+            <div style="text-align: left;">
+                <strong>${ex.name}</strong><br>
+                <small style="color: #64748b;">${ex.description}</small>
+            </div>
+        </button>`;
+    });
+    document.getElementById('exerciseModal').style.display = 'block';
+}
+
+function selectExercise(idx) {
+    selectedExercise = EXERCISES[idx];
+    closeExerciseModal();
+    document.getElementById('feedbackCard').style.display = 'block';
+    document.getElementById('resultsCard').style.display = 'none';
+    startExerciseDetection();
+    updateExerciseInstructions();
+    showNotification(`Starting ${selectedExercise.name} exercise`, 'success');
+}
+
+function closeExerciseModal() {
+    document.getElementById('exerciseModal').style.display = 'none';
+}
+
+function startExerciseDetection() {
+    exerciseActive = true;
+    let startTime = Date.now();
+    detectionInterval = setInterval(async () => {
+        if (!exerciseActive) return;
+        // Capture frame from video
+        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        const frame = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+        // Call backend for movement detection
+        const res = await fetch('/dyspraxia/detect-movement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ frame, movement: selectedExercise.movement })
+        });
+        const data = await res.json();
+        let detected = data.success && data.detected;
+        let feedback = data.feedback ? data.feedback.join('<br>') : '';
+        // Draw overlay: green border if detected, else gray
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = detected ? '#10b981' : '#64748b';
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+        // Feedback
+        document.getElementById('movementFeedback').innerHTML = `
+            <div style="text-align: center;">
+                <img src="${selectedExercise.image}" alt="${selectedExercise.name}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem;">
+                <div style="font-size: 1.2rem; color: ${detected ? '#10b981' : '#ef4444'}; margin-bottom: 1rem;">
+                    ${feedback}
+                </div>
+            </div>
+        `;
+        // Auto-stop after exercise duration
+        if ((Date.now() - startTime) / 1000 > (selectedExercise.duration || 10)) {
+            stopExercise();
+        }
+    }, 1000);
+}
+
+function updateExerciseInstructions() {
+    const instructions = document.getElementById('exerciseInstructions');
+    if (!selectedExercise) {
+        instructions.innerHTML = '<p>Select an exercise to see instructions.</p>';
+        return;
+    }
+    instructions.innerHTML = `
+        <div style="text-align: center;">
+            <img src="${selectedExercise.image}" alt="${selectedExercise.name}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem;">
+            <h4 style="margin-bottom: 1rem;">${selectedExercise.name}</h4>
+            <p style="color: #64748b; margin-bottom: 1rem;">${selectedExercise.description}</p>
+            <div style="color: #374151; font-size: 1.1rem;">${selectedExercise.instructions}</div>
+        </div>
+    `;
+}
+
+function stopExercise() {
+    exerciseActive = false;
+    
+    if (detectionInterval) {
+        clearInterval(detectionInterval);
+        detectionInterval = null;
+    }
+    
+    if (currentExercise) {
+        showExerciseResults();
+    }
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function showExerciseResults() {
+    const results = document.getElementById('exerciseResults');
+    const resultsCard = document.getElementById('resultsCard');
+    
+    // Simulate results
+    const score = Math.floor(Math.random() * 40) + 60; // 60-100
+    const duration = Math.floor(Math.random() * 10) + 20; // 20-30 seconds
+    
+    let feedback = '';
+    let emoji = '';
+    
+    if (score >= 85) {
+        feedback = 'Excellent performance! Your coordination and balance are improving.';
+        emoji = '🎉';
+    } else if (score >= 70) {
+        feedback = 'Good job! Keep practicing to improve further.';
+        emoji = '👍';
+    } else {
+        feedback = 'Nice effort! Regular practice will help you improve.';
+        emoji = '💪';
+    }
+    
+    results.innerHTML = `
+        <div style="text-align: center;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">${emoji}</div>
+            <h4 style="margin-bottom: 2rem; color: #ef4444;">Exercise Complete!</h4>
+            
+            <div class="grid grid-3" style="gap: 1rem; margin-bottom: 2rem;">
+                <div>
+                    <div style="font-size: 2rem; font-weight: bold; color: #ef4444;">${score}%</div>
+                    <div style="color: #64748b;">Performance Score</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: bold; color: #10b981;">${duration}s</div>
+                    <div style="color: #64748b;">Duration</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: bold; color: #f59e0b;">${currentExercise}</div>
+                    <div style="color: #64748b;">Exercise Type</div>
+                </div>
+            </div>
+            
+            <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem;">${feedback}</p>
+            
+            <button onclick="startExercise()" class="btn btn-primary">
+                Try Another Exercise
+            </button>
+        </div>
+    `;
+    
+    resultsCard.style.display = 'block';
+    currentExercise = null;
+}
+
+// Close modal when clicking outside
+document.getElementById('exerciseModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeExerciseModal();
+    }
+});
+</script>
+{% endblock %}

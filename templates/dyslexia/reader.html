@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Text Reader - Dyslexia Support{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title dyslexic-font">📖 Smart Text Reader</h1>
+        <p style="color: #64748b;">Paste text below to get an AI-simplified version that's easier to read</p>
+    </div>
+    
+    <!-- Reading Settings -->
+    <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h4 style="margin-bottom: 1rem;">Reading Settings</h4>
+        <div class="grid grid-4" style="gap: 1rem;">
+            <div>
+                <label class="form-label">Font Size</label>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <button onclick="adjustFontSize(-2)" class="btn btn-primary" style="padding: 0.5rem;">-</button>
+                    <span id="fontSizeDisplay">16px</span>
+                    <button onclick="adjustFontSize(2)" class="btn btn-primary" style="padding: 0.5rem;">+</button>
+                </div>
+            </div>
+            
+            <div>
+                <label class="form-label">Line Spacing</label>
+                <select id="lineSpacing" onchange="updateLineSpacing()" class="form-input">
+                    <option value="1.2">Normal</option>
+                    <option value="1.5" selected>Comfortable</option>
+                    <option value="2.0">Wide</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="form-label">Font Family</label>
+                <select id="fontFamily" onchange="updateFontFamily()" class="form-input">
+                    <option value="OpenDyslexic">OpenDyslexic</option>
+                    <option value="Inter">Inter</option>
+                    <option value="Arial">Arial</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="form-label">Background</label>
+                <select id="background" onchange="updateBackground()" class="form-input">
+                    <option value="white">White</option>
+                    <option value="cream">Cream</option>
+                    <option value="light-blue">Light Blue</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Text Input -->
+    <div class="form-group">
+        <label class="form-label">Enter or paste your text here:</label>
+        <textarea id="inputText" class="form-textarea" rows="6" placeholder="Paste the text you want to read and simplify here..."></textarea>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <button onclick="simplifyText()" class="btn btn-primary">
+            <i class="fas fa-magic"></i> Simplify Text
+        </button>
+        <button onclick="readAloud('original')" class="btn btn-success">
+            <i class="fas fa-volume-up"></i> Read Original
+        </button>
+        <button onclick="readAloud('simplified')" class="btn btn-success">
+            <i class="fas fa-volume-up"></i> Read Simplified
+        </button>
+        <button onclick="stopReading()" class="btn btn-danger" id="stopBtn" style="display: none;">
+            <i class="fas fa-stop"></i> Stop Reading
+        </button>
+    </div>
+    
+    <!-- Text Display -->
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Original Text</h3>
+            </div>
+            <div id="originalText" class="reading-content" style="min-height: 200px; padding: 1.5rem; line-height: 1.5;">
+                <p style="color: #64748b; font-style: italic;">Original text will appear here...</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Simplified Text</h3>
+            </div>
+            <div id="simplifiedText" class="reading-content" style="min-height: 200px; padding: 1.5rem; line-height: 1.5;">
+                <p style="color: #64748b; font-style: italic;">Simplified text will appear here...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analysis Results -->
+    <div id="analysisResults" class="card" style="display: none; margin-top: 2rem;">
+        <div class="card-header">
+            <h3 class="card-title">Text Analysis</h3>
+        </div>
+        <div id="analysisContent"></div>
+    </div>
+</div>
+
+<script>
+let currentFontSize = 16;
+let speechSynthesis = window.speechSynthesis;
+let currentUtterance = null;
+
+function adjustFontSize(change) {
+    currentFontSize = Math.max(12, Math.min(32, currentFontSize + change));
+    document.getElementById('fontSizeDisplay').textContent = currentFontSize + 'px';
+    updateReadingStyles();
+}
+
+function updateLineSpacing() {
+    updateReadingStyles();
+}
+
+function updateFontFamily() {
+    updateReadingStyles();
+}
+
+function updateBackground() {
+    const background = document.getElementById('background').value;
+    const readingContents = document.querySelectorAll('.reading-content');
+    
+    readingContents.forEach(content => {
+        switch(background) {
+            case 'cream':
+                content.style.backgroundColor = '#fefcf0';
+                break;
+            case 'light-blue':
+                content.style.backgroundColor = '#f0f9ff';
+                break;
+            default:
+                content.style.backgroundColor = 'white';
+        }
+    });
+}
+
+function updateReadingStyles() {
+    const lineSpacing = document.getElementById('lineSpacing').value;
+    const fontFamily = document.getElementById('fontFamily').value;
+    const readingContents = document.querySelectorAll('.reading-content');
+    
+    readingContents.forEach(content => {
+        content.style.fontSize = currentFontSize + 'px';
+        content.style.lineHeight = lineSpacing;
+        
+        if (fontFamily === 'OpenDyslexic') {
+            content.classList.add('dyslexic-font');
+        } else {
+            content.classList.remove('dyslexic-font');
+            content.style.fontFamily = fontFamily;
+        }
+    });
+}
+
+async function simplifyText() {
+    const inputText = document.getElementById('inputText').value.trim();
+    
+    if (!inputText) {
+        showNotification('Please enter some text first', 'warning');
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('originalText').innerHTML = '<div class="spinner"></div>';
+    document.getElementById('simplifiedText').innerHTML = '<div class="spinner"></div>';
+    
+    try {
+        const response = await fetch('/dyslexia/simplify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: inputText })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            document.getElementById('originalText').innerHTML = `<p>${result.original}</p>`;
+            document.getElementById('simplifiedText').innerHTML = `<p>${result.simplified}</p>`;
+            
+            // Show analysis
+            showAnalysis(result.analysis);
+            
+            // Update styles
+            updateReadingStyles();
+            
+            showNotification('Text simplified successfully!', 'success');
+        } else {
+            showNotification(result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error simplifying text', 'error');
+    }
+}
+
+function showAnalysis(analysis) {
+    const analysisResults = document.getElementById('analysisResults');
+    const analysisContent = document.getElementById('analysisContent');
+    
+    analysisContent.innerHTML = `
+        <div class="grid grid-4">
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; color: #3b82f6;">${analysis.word_count}</div>
+                <div style="color: #64748b;">Words</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; color: #10b981;">${analysis.sentence_count}</div>
+                <div style="color: #64748b;">Sentences</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; color: #f59e0b;">${analysis.avg_word_length}</div>
+                <div style="color: #64748b;">Avg Word Length</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; color: #ef4444;">${analysis.difficulty}</div>
+                <div style="color: #64748b;">Difficulty</div>
+            </div>
+        </div>
+    `;
+    
+    analysisResults.style.display = 'block';
+}
+
+function readAloud(type) {
+    stopReading();
+    
+    let textToRead = '';
+    if (type === 'original') {
+        textToRead = document.getElementById('originalText').textContent;
+    } else {
+        textToRead = document.getElementById('simplifiedText').textContent;
+    }
+    
+    if (!textToRead || textToRead.includes('will appear here')) {
+        showNotification('No text to read', 'warning');
+        return;
+    }
+    
+    currentUtterance = new SpeechSynthesisUtterance(textToRead);
+    currentUtterance.rate = 0.8; // Slower for dyslexic readers
+    currentUtterance.pitch = 1.0;
+    currentUtterance.volume = 1.0;
+    
+    currentUtterance.onstart = () => {
+        document.getElementById('stopBtn').style.display = 'inline-block';
+    };
+    
+    currentUtterance.onend = () => {
+        document.getElementById('stopBtn').style.display = 'none';
+    };
+    
+    speechSynthesis.speak(currentUtterance);
+}
+
+function stopReading() {
+    if (currentUtterance) {
+        speechSynthesis.cancel();
+        document.getElementById('stopBtn').style.display = 'none';
+    }
+}
+
+// Initialize styles
+document.addEventListener('DOMContentLoaded', function() {
+    updateReadingStyles();
+});
+</script>
+{% endblock %}

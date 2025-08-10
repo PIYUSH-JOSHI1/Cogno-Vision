@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Learning Support Platform{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Welcome back, {{ session.username }}!</h1>
+        <p style="color: #64748b;">Here's your learning progress overview</p>
+    </div>
+</div>
+
+<div class="grid grid-4" id="statsCards">
+    <div class="card dyslexia-bg" style="text-align: center;">
+        <i class="fas fa-book-open dyslexia-color" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+        <h3 id="dyslexiaSessions">-</h3>
+        <p style="color: #64748b;">Dyslexia Sessions</p>
+    </div>
+    
+    <div class="card dyscalculia-bg" style="text-align: center;">
+        <i class="fas fa-calculator dyscalculia-color" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+        <h3 id="dyscalculiaProblems">-</h3>
+        <p style="color: #64748b;">Math Problems Solved</p>
+    </div>
+    
+    <div class="card dysgraphia-bg" style="text-align: center;">
+        <i class="fas fa-pen dysgraphia-color" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+        <h3 id="dysgraphiaWords">-</h3>
+        <p style="color: #64748b;">Words Written</p>
+    </div>
+    
+    <div class="card dyspraxia-bg" style="text-align: center;">
+        <i class="fas fa-running dyspraxia-color" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+        <h3 id="dyspraxiaExercises">-</h3>
+        <p style="color: #64748b;">Motor Exercises</p>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Quick Access</h3>
+        </div>
+        
+        <div class="grid grid-2" style="gap: 1rem;">
+            <a href="/dyslexia/reader" class="btn btn-primary" style="display: flex; align-items: center; justify-content: center; padding: 1.5rem; text-decoration: none;">
+                <i class="fas fa-book-open" style="margin-right: 0.5rem;"></i>
+                Text Reader
+            </a>
+            
+            <a href="/dyscalculia/practice" class="btn btn-success" style="display: flex; align-items: center; justify-content: center; padding: 1.5rem; text-decoration: none;">
+                <i class="fas fa-calculator" style="margin-right: 0.5rem;"></i>
+                Math Practice
+            </a>
+            
+            <a href="/dysgraphia/writing-practice" class="btn btn-warning" style="display: flex; align-items: center; justify-content: center; padding: 1.5rem; text-decoration: none;">
+                <i class="fas fa-pen" style="margin-right: 0.5rem;"></i>
+                Writing Practice
+            </a>
+            
+            <a href="/dyspraxia/balance-training" class="btn btn-danger" style="display: flex; align-items: center; justify-content: center; padding: 1.5rem; text-decoration: none;">
+                <i class="fas fa-running" style="margin-right: 0.5rem;"></i>
+                Balance Training
+            </a>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Recent Activity</h3>
+        </div>
+        
+        <div id="recentActivity">
+            <div class="spinner"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Progress Overview</h3>
+    </div>
+    
+    <div class="grid grid-2">
+        <div>
+            <h4 style="margin-bottom: 1rem;">Overall Statistics</h4>
+            <div id="overallStats">
+                <div class="spinner"></div>
+            </div>
+        </div>
+        
+        <div>
+            <h4 style="margin-bottom: 1rem;">Recommendations</h4>
+            <div id="recommendations">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+});
+
+async function loadDashboardData() {
+    try {
+        const response = await fetch('/dashboard/data');
+        const result = await response.json();
+        
+        if (result.success) {
+            updateDashboard(result.data);
+        } else {
+            showNotification('Error loading dashboard data', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error loading dashboard data', 'error');
+    }
+}
+
+function updateDashboard(data) {
+    // Update stats cards
+    document.getElementById('dyslexiaSessions').textContent = data.dyslexia.total_sessions;
+    document.getElementById('dyscalculiaProblems').textContent = data.dyscalculia.total_problems;
+    document.getElementById('dysgraphiaWords').textContent = data.dysgraphia.total_words_written;
+    document.getElementById('dyspraxiaExercises').textContent = data.dyspraxia.total_exercises;
+    
+    // Update recent activity
+    updateRecentActivity(data);
+    
+    // Update overall stats
+    updateOverallStats(data.overall_stats);
+    
+    // Update recommendations
+    updateRecommendations(data);
+}
+
+function updateRecentActivity(data) {
+    const container = document.getElementById('recentActivity');
+    let html = '';
+    
+    // Combine recent activities from all modules
+    const allActivities = [
+        ...data.dyslexia.recent_activity.map(a => ({...a, module: 'dyslexia', icon: 'book-open'})),
+        ...data.dyscalculia.recent_activity.map(a => ({...a, module: 'dyscalculia', icon: 'calculator'})),
+        ...data.dysgraphia.recent_activity.map(a => ({...a, module: 'dysgraphia', icon: 'pen'})),
+        ...data.dyspraxia.recent_activity.map(a => ({...a, module: 'dyspraxia', icon: 'running'}))
+    ];
+    
+    // Sort by timestamp
+    allActivities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    if (allActivities.length === 0) {
+        html = '<p style="color: #64748b; text-align: center; padding: 2rem;">No recent activity</p>';
+    } else {
+        allActivities.slice(0, 5).forEach(activity => {
+            const date = new Date(activity.timestamp).toLocaleDateString();
+            html += `
+                <div style="display: flex; align-items: center; padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
+                    <i class="fas fa-${activity.icon} ${activity.module}-color" style="margin-right: 1rem; width: 20px;"></i>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 500;">${activity.activity || activity.activity_name || 'Activity'}</div>
+                        <div style="font-size: 0.875rem; color: #64748b;">${date}</div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    container.innerHTML = html;
+}
+
+function updateOverallStats(stats) {
+    const container = document.getElementById('overallStats');
+    
+    container.innerHTML = `
+        <div style="display: grid; gap: 1rem;">
+            <div style="display: flex; justify-content: space-between;">
+                <span>Total Activities:</span>
+                <strong>${stats.total_activities}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Active Days:</span>
+                <strong>${stats.active_days}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Current Streak:</span>
+                <strong>${stats.streak} days</strong>
+            </div>
+        </div>
+    `;
+}
+
+function updateRecommendations(data) {
+    const container = document.getElementById('recommendations');
+    let html = '';
+    
+    // Generate recommendations based on activity
+    const recommendations = [];
+    
+    if (data.dyslexia.total_sessions < 5) {
+        recommendations.push({
+            text: 'Try the text reader to improve reading skills',
+            link: '/dyslexia/reader',
+            icon: 'book-open',
+            color: 'dyslexia'
+        });
+    }
+    
+    if (data.dyscalculia.total_problems < 10) {
+        recommendations.push({
+            text: 'Practice more math problems to build confidence',
+            link: '/dyscalculia/practice',
+            icon: 'calculator',
+            color: 'dyscalculia'
+        });
+    }
+    
+    if (data.dysgraphia.total_words_written < 50) {
+        recommendations.push({
+            text: 'Work on writing practice to improve skills',
+            link: '/dysgraphia/writing-practice',
+            icon: 'pen',
+            color: 'dysgraphia'
+        });
+    }
+    
+    if (data.dyspraxia.total_exercises < 3) {
+        recommendations.push({
+            text: 'Try balance exercises to improve motor skills',
+            link: '/dyspraxia/balance-training',
+            icon: 'running',
+            color: 'dyspraxia'
+        });
+    }
+    
+    if (recommendations.length === 0) {
+        html = '<p style="color: #64748b; text-align: center;">Great job! Keep up the excellent work!</p>';
+    } else {
+        recommendations.forEach(rec => {
+            html += `
+                <div style="margin-bottom: 1rem;">
+                    <a href="${rec.link}" style="display: flex; align-items: center; padding: 1rem; background: #f8fafc; border-radius: 8px; text-decoration: none; color: inherit; border-left: 4px solid;" class="${rec.color}-bg">
+                        <i class="fas fa-${rec.icon} ${rec.color}-color" style="margin-right: 1rem;"></i>
+                        <span>${rec.text}</span>
+                    </a>
+                </div>
+            `;
+        });
+    }
+    
+    container.innerHTML = html;
+}
+</script>
+{% endblock %}

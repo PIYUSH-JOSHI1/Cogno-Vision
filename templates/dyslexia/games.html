@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonics Games - Dyslexia Support</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #8ff4f6ff 0%, #b2e8faff 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .dyslexic-font {
+            font-family: 'OpenDyslexic', 'Arial', sans-serif;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 2rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        
+        .card-title {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .grid {
+            display: grid;
+            gap: 2rem;
+            padding: 2rem;
+        }
+        
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        
+        .dyslexia-bg {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 2px solid #3b82f6;
+        }
+        
+        .dyslexia-color {
+            color: #3b82f6;
+        }
+        
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            transform: scale(0.7);
+            transition: transform 0.3s;
+        }
+        
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #6b7280;
+            float: right;
+        }
+        
+        .close-btn:hover {
+            color: #ef4444;
+        }
+        
+        .question-container {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .question-word {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .question-word .word {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .audio-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .audio-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .audio-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .options-container {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .option input[type="radio"] {
+            margin-right: 1rem;
+            transform: scale(1.3);
+        }
+        
+        .option-text {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 1.4rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .play-sound-btn {
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .play-sound-btn:hover {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .game-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e5e7eb;
+        }
+        
+        .score-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        .results-container {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .results-emoji {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .results-score {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #3b82f6;
+        }
+        
+        .results-accuracy {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .word-building-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1.3rem;
+            margin-top: 1rem;
+        }
+        
+        .word-building-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .sounds-display {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .sound-chip {
+            background: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        @keyframes correctAnswer {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes wrongAnswer {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+        
+        .correct-answer {
+            animation: correctAnswer 0.6s ease-in-out;
+            border-color: #10b981 !important;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0) !important;
+        }
+        
+        .wrong-answer {
+            animation: wrongAnswer 0.5s ease-in-out;
+            border-color: #ef4444 !important;
+            background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title dyslexic-font">🎮 Phonics Games</h1>
+            <p style="color: rgba(255,255,255,0.9); font-size: 1.2rem;">Interactive games to improve sound-letter recognition and reading skills</p>
+        </div>
+    </div>
+
+    <div class="grid grid-2">
+        <div class="card dyslexia-bg">
+            <div style="text-align: center; padding: 2rem;">
+                <i class="fas fa-music dyslexia-color" style="font-size: 4rem; margin-bottom: 1.5rem;"></i>
+                <h3 style="margin-bottom: 1rem; color: #1f2937;">Sound Matching Game</h3>
+                <p style="color: #64748b; margin-bottom: 2rem; line-height: 1.6;">Match sounds to their corresponding letters and letter combinations</p>
+                <button onclick="startPhonicGame()" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-play"></i> Start Game
+                </button>
+            </div>
+        </div>
+        
+        <div class="card dyslexia-bg">
+            <div style="text-align: center; padding: 2rem;">
+                <i class="fas fa-spell-check dyslexia-color" style="font-size: 4rem; margin-bottom: 1.5rem;"></i>
+                <h3 style="margin-bottom: 1rem; color: #1f2937;">Word Building</h3>
+                <p style="color: #64748b; margin-bottom: 2rem; line-height: 1.6;">Build words from individual sounds and letter combinations</p>
+                <button onclick="startWordBuilding()" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-play"></i> Start Game
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Modal -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <div class="game-header">
+                <h3 id="gameTitle">Phonics Game</h3>
+                <button class="close-btn" onclick="closeGame()">&times;</button>
+            </div>
+            
+            <div id="progressBar" class="progress-bar" style="display: none;">
+                <div id="progressFill" class="progress-fill" style="width: 0%;"></div>
+            </div>
+            
+            <div id="gameContent"></div>
+            
+            <div class="game-footer">
+                <div id="gameScore" class="score-display">Score: 0/5</div>
+                <button id="submitAnswers" onclick="submitGame()" class="btn btn-success" style="display: none;">
+                    <i class="fas fa-check"></i> Submit Answers
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="background: linear-gradient(135deg, #10b981, #059669);">
+            <h3 class="card-title" style="font-size: 2rem;">📋 Game Instructions</h3>
+        </div>
+        
+        <div class="grid grid-2">
+            <div style="padding: 2rem;">
+                <h4 style="margin-bottom: 1rem; color: #3b82f6; font-size: 1.3rem;">🎵 Sound Matching Game</h4>
+                <ul style="color: #64748b; line-height: 2; font-size: 1.1rem; list-style: none; padding-left: 0;">
+                    <li style="margin-bottom: 0.5rem;">🎧 Listen to or read the word presented</li>
+                    <li style="margin-bottom: 0.5rem;">✅ Choose the correct sound breakdown from the options</li>
+                    <li style="margin-bottom: 0.5rem;">🔍 Focus on how the word sounds when broken into parts</li>
+                    <li style="margin-bottom: 0.5rem;">🎯 Complete all questions to see your score</li>
+                </ul>
+            </div>
+            
+            <div style="padding: 2rem;">
+                <h4 style="margin-bottom: 1rem; color: #3b82f6; font-size: 1.3rem;">🔤 Word Building Game</h4>
+                <ul style="color: #64748b; line-height: 2; font-size: 1.1rem; list-style: none; padding-left: 0;">
+                    <li style="margin-bottom: 0.5rem;">👀 Look at the individual sounds provided</li>
+                    <li style="margin-bottom: 0.5rem;">⌨️ Type the complete word that these sounds make</li>
+                    <li style="margin-bottom: 0.5rem;">🧠 Think about how the sounds blend together</li>
+                    <li style="margin-bottom: 0.5rem;">✏️ Check your spelling carefully before submitting</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentGame = null;
+        let gameAnswers = [];
+        let gameQuestions = [];
+        let currentQuestionIndex = 0;
+
+        // Comprehensive phonics question bank
+        const phonicsQuestionBank = [
+            // Simple CVC words
+            { word: 'cat', sounds: ['c-a-t', 'ca-t', 'c-at', 'cat'], correct: 0, hint: 'Listen for each separate sound: c... a... t', level: 'Easy' },
+            { word: 'dog', sounds: ['d-o-g', 'do-g', 'd-og', 'dog'], correct: 0, hint: 'Break it down: d... o... g', level: 'Easy' },
+            { word: 'pig', sounds: ['p-i-g', 'pi-g', 'p-ig', 'pig'], correct: 0, hint: 'Three separate sounds: p... i... g', level: 'Easy' },
+            { word: 'sun', sounds: ['s-u-n', 'su-n', 's-un', 'sun'], correct: 0, hint: 'Listen carefully: s... u... n', level: 'Easy' },
+            { word: 'hat', sounds: ['h-a-t', 'ha-t', 'h-at', 'hat'], correct: 0, hint: 'Break it apart: h... a... t', level: 'Easy' },
+            
+            // Digraphs
+            { word: 'ship', sounds: ['s-h-i-p', 'sh-i-p', 's-hip', 'ship'], correct: 1, hint: 'Listen for the "sh" sound at the beginning', level: 'Medium' },
+            { word: 'fish', sounds: ['f-i-s-h', 'f-i-sh', 'fi-sh', 'fish'], correct: 2, hint: 'The "sh" sound comes at the end', level: 'Medium' },
+            { word: 'chat', sounds: ['c-h-a-t', 'ch-a-t', 'cha-t', 'chat'], correct: 1, hint: 'Listen for the "ch" sound at the start', level: 'Medium' },
+            { word: 'thick', sounds: ['t-h-i-c-k', 'th-i-c-k', 'thi-ck', 'thick'], correct: 1, hint: 'The "th" makes one sound', level: 'Medium' },
+            { word: 'wheel', sounds: ['w-h-e-e-l', 'wh-ee-l', 'whe-el', 'wheel'], correct: 1, hint: 'Listen for "wh" and the long "ee" sound', level: 'Medium' },
+            
+            // Blends
+            { word: 'tree', sounds: ['t-r-e-e', 'tr-ee', 't-ree', 'tree'], correct: 1, hint: 'Notice the "tr" blend and long "ee" sound', level: 'Medium' },
+            { word: 'frog', sounds: ['f-r-o-g', 'fr-o-g', 'f-rog', 'frog'], correct: 1, hint: 'The "fr" blend comes first', level: 'Medium' },
+            { word: 'clap', sounds: ['c-l-a-p', 'cl-a-p', 'cla-p', 'clap'], correct: 1, hint: 'Listen for the "cl" blend', level: 'Medium' },
+            { word: 'stop', sounds: ['s-t-o-p', 'st-o-p', 'sto-p', 'stop'], correct: 1, hint: 'The "st" blend starts the word', level: 'Medium' },
+            { word: 'plant', sounds: ['p-l-a-n-t', 'pl-a-n-t', 'pla-nt', 'plant'], correct: 1, hint: 'Start with the "pl" blend', level: 'Hard' },
+            
+            // Complex words
+            { word: 'chair', sounds: ['c-h-a-i-r', 'ch-ai-r', 'cha-ir', 'chair'], correct: 1, hint: 'Listen for "ch" sound and "ai" vowel sound', level: 'Hard' },
+            { word: 'snake', sounds: ['s-n-a-k-e', 'sn-a-k-e', 'sna-ke', 'snake'], correct: 2, hint: 'The "sn" blend and long "a" sound', level: 'Hard' },
+            { word: 'bright', sounds: ['b-r-i-g-h-t', 'br-i-gh-t', 'bri-ght', 'bright'], correct: 2, hint: '"br" blend and "ight" ending', level: 'Hard' },
+            { word: 'spring', sounds: ['s-p-r-i-n-g', 'spr-i-ng', 'spri-ng', 'spring'], correct: 2, hint: 'Three consonant blend "spr"', level: 'Hard' },
+            { word: 'dragon', sounds: ['d-r-a-g-o-n', 'dr-a-g-on', 'dra-gon', 'dragon'], correct: 2, hint: '"dr" blend at the start', level: 'Hard' }
+        ];
+
+        // Word building question bank
+        const wordBuildingQuestionBank = [
+            // Easy words
+            { sounds: ['c', 'a', 't'], correct: 'cat', level: 'Easy' },
+            { sounds: ['d', 'o', 'g'], correct: 'dog', level: 'Easy' },
+            { sounds: ['b', 'i', 'g'], correct: 'big', level: 'Easy' },
+            { sounds: ['r', 'u', 'n'], correct: 'run', level: 'Easy' },
+            { sounds: ['h', 'o', 't'], correct: 'hot', level: 'Easy' },
+            
+            // Medium words
+            { sounds: ['f', 'i', 'sh'], correct: 'fish', level: 'Medium' },
+            { sounds: ['sh', 'i', 'p'], correct: 'ship', level: 'Medium' },
+            { sounds: ['tr', 'ee'], correct: 'tree', level: 'Medium' },
+            { sounds: ['fr', 'o', 'g'], correct: 'frog', level: 'Medium' },
+            { sounds: ['cl', 'a', 'p'], correct: 'clap', level: 'Medium' },
+            
+            // Hard words
+            { sounds: ['b', 'i', 'r', 'd'], correct: 'bird', level: 'Hard' },
+            { sounds: ['ch', 'ai', 'r'], correct: 'chair', level: 'Hard' },
+            { sounds: ['sn', 'a', 'ke'], correct: 'snake', level: 'Hard' },
+            { sounds: ['br', 'i', 'ght'], correct: 'bright', level: 'Hard' },
+            { sounds: ['spr', 'i', 'ng'], correct: 'spring', level: 'Hard' }
+        ];
+
+        function getRandomQuestions(questionBank, count = 5) {
+            const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        function startPhonicGame() {
+            currentGame = 'phonics';
+            gameQuestions = getRandomQuestions(phonicsQuestionBank, 5);
+            gameAnswers = [];
+            currentQuestionIndex = 0;
+            
+            displayPhonicGame(gameQuestions);
+            showModal();
+        }
+
+        function displayPhonicGame(questions) {
+            document.getElementById('gameTitle').textContent = 'Sound Matching Game';
+            document.getElementById('progressBar').style.display = 'block';
+            updateProgress(0, questions.length);
+            
+            if (!questions || !Array.isArray(questions) || questions.length === 0) {
+                document.getElementById('gameContent').innerHTML = `
+                    <div class="results-container">
+                        <p style="color: #ef4444; font-size: 1.2rem;">Error: No questions available</p>
+                        <button onclick="closeGame()" class="btn btn-primary">Close</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div style="display: grid; gap: 2rem;">';
+            
+            questions.forEach((question, index) => {
+                if (!question || !question.word || !question.sounds || !Array.isArray(question.sounds)) {
+                    return;
+                }
+                
+                html += `
+                    <div class="question-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="margin: 0; color: #1f2937;">Question ${index + 1} of ${questions.length}</h4>
+                            <div style="background: ${getColorForLevel(question.level)}; color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; font-weight: bold;">
+                                ${question.level || 'Medium'}
+                            </div>
+                        </div>
+                        
+                        <div class="question-word">
+                            <div class="word">"${question.word}"</div>
+                            <div class="audio-controls">
+                                <button class="audio-btn" onclick="playWordSound('${question.word}')">
+                                    🔊 Play Word
+                                </button>
+                                <button class="audio-btn" onclick="playWordSound('${question.word}'); setTimeout(() => playSound('${question.sounds[question.correct]}'), 1500);">
+                                    🎯 Compare Sounds
+                                </button>
+                            </div>
+                            ${question.hint ? `<div style="margin-top: 1rem; font-size: 0.9rem; background: rgba(255,255,255,0.1); padding: 0.75rem; border-radius: 8px; border-left: 3px solid white;">💡 Hint: ${question.hint}</div>` : ''}
+                        </div>
+                        
+                        <p style="color: #374151; font-weight: bold; font-size: 1.1rem; text-align: center; margin-bottom: 1.5rem;">
+                            🎧 Listen carefully, then choose the correct sound breakdown:
+                        </p>
+                        
+                        <div class="options-container">
+                `;
+                
+                question.sounds.forEach((sound, soundIndex) => {
+                    html += `
+                        <div class="option" onclick="selectAnswer(${index}, ${soundIndex})">
+                            <input type="radio" name="question_${index}" value="${soundIndex}">
+                            <div class="option-text">${sound}</div>
+                            <button type="button" class="play-sound-btn" onclick="playSound('${sound}'); event.stopPropagation();">
+                                🔊
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            });
+            
+            html += '</div>';
+            
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitAnswers').style.display = 'block';
+            document.getElementById('gameScore').textContent = 'Score: 0/' + questions.length;
+            
+            // Auto-play the first word
+            setTimeout(() => {
+                if (questions.length > 0 && questions[0].word) {
+                    playWordSound(questions[0].word);
+                }
+            }, 1000);
+        }
+
+        function startWordBuilding() {
+            currentGame = 'word-building';
+            gameQuestions = getRandomQuestions(wordBuildingQuestionBank, 5);
+            gameAnswers = [];
+            currentQuestionIndex = 0;
+            
+            displayWordBuildingGame(gameQuestions);
+            showModal();
+        }
+
+        function displayWordBuildingGame(questions) {
+            document.getElementById('gameTitle').textContent = 'Word Building Game';
+            document.getElementById('progressBar').style.display = 'block';
+            updateProgress(0, questions.length);
+            
+            let html = '<div style="display: grid; gap: 2rem;">';
+            
+            questions.forEach((question, index) => {
+                html += `
+                    <div class="question-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="margin: 0; color: #1f2937;">Question ${index + 1} of ${questions.length}</h4>
+                            <div style="background: ${getColorForLevel(question.level)}; color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; font-weight: bold;">
+                                ${question.level || 'Medium'}
+                            </div>
+                        </div>
+                        
+                        <p style="color: #64748b; margin-bottom: 1.5rem; text-align: center; font-size: 1.1rem;">
+                            🔤 Build a word from these sounds:
+                        </p>
+                        
+                        <div class="sounds-display">
+                `;
+                
+                question.sounds.forEach(sound => {
+                    html += `<span class="sound-chip">${sound}</span>`;
+                });
+                
+                html += `
+                        </div>
+                        
+                        <input type="text" 
+                               name="word_${index}" 
+                               placeholder="Type the word here..." 
+                               class="word-building-input"
+                               autocomplete="off"
+                               onkeyup="updateAnswerPreview(this, ${index})">
+                        
+                        <div id="preview_${index}" style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #64748b;"></div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            document.getElementById('gameContent').innerHTML = html;
+            document.getElementById('submitAnswers').style.display = 'block';
+            document.getElementById('gameScore').textContent = 'Score: 0/' + questions.length;
+        }
+
+        function getColorForLevel(level) {
+            switch(level) {
+                case 'Easy': return '#10b981';
+                case 'Medium': return '#f59e0b';
+                case 'Hard': return '#ef4444';
+                default: return '#6b7280';
+            }
+        }
+
+        function updateProgress(current, total) {
+            const percentage = (current / total) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+
+        function updateAnswerPreview(input, questionIndex) {
+            const preview = document.getElementById(`preview_${questionIndex}`);
+            if (input.value.trim()) {
+                preview.innerHTML = `✏️ Your answer: <strong style="color: #3b82f6;">${input.value}</strong>`;
+            } else {
+                preview.innerHTML = '';
+            }
+        }
+
+        function selectAnswer(questionIndex, answerIndex) {
+            const radioButton = document.querySelector(`input[name="question_${questionIndex}"][value="${answerIndex}"]`);
+            if (radioButton) {
+                radioButton.checked = true;
+            }
+            
+            const question = gameQuestions[questionIndex];
+            const isCorrect = answerIndex === question.correct;
+            
+            // Visual feedback
+            const options = document.querySelectorAll(`[onclick*="selectAnswer(${questionIndex}"]`);
+            const selectedOption = options[answerIndex];
+            
+            // Reset all options first
+            options.forEach(option => {
+                option.classList.remove('correct-answer', 'wrong-answer');
+            });
+            
+            if (isCorrect) {
+                selectedOption.classList.add('correct-answer');
+                // Play success sound
+                setTimeout(() => {
+                    if (speechSynthesis) {
+                        speechSynthesis.cancel();
+                        const successUtterance = new SpeechSynthesisUtterance('Correct! Well done!');
+                        successUtterance.rate = 0.9;
+                        successUtterance.pitch = 1.3;
+                        speechSynthesis.speak(successUtterance);
+                    }
+                }, 300);
+            } else {
+                selectedOption.classList.add('wrong-answer');
+                // Show the correct answer after a delay
+                setTimeout(() => {
+                    if (options[question.correct]) {
+                        options[question.correct].style.background = 'linear-gradient(135deg, #d1fae5, #a7f3d0)';
+                        options[question.correct].style.borderColor = '#10b981';
+                    }
+                }, 500);
+            }
+            
+            // Update progress
+            const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
+            updateProgress(answeredQuestions, gameQuestions.length);
+            
+            // Remove visual feedback after animation
+            setTimeout(() => {
+                selectedOption.classList.remove('correct-answer', 'wrong-answer');
+            }, 2000);
+        }
+
+        function submitGame() {
+            gameAnswers = [];
+            
+            if (currentGame === 'phonics') {
+                const radios = document.querySelectorAll('input[type="radio"]:checked');
+                if (radios.length === 0) {
+                    alert('Please answer at least one question before submitting.');
+                    return;
+                }
+                radios.forEach(radio => {
+                    gameAnswers.push(parseInt(radio.value));
+                });
+            } else if (currentGame === 'word-building') {
+                const inputs = document.querySelectorAll('input[type="text"]');
+                let hasAnswers = false;
+                inputs.forEach(input => {
+                    const answer = input.value.toLowerCase().trim();
+                    gameAnswers.push(answer);
+                    if (answer) hasAnswers = true;
+                });
+                if (!hasAnswers) {
+                    alert('Please answer at least one question before submitting.');
+                    return;
+                }
+            }
+            
+            calculateResults();
+        }
+
+        function calculateResults() {
+            let score = 0;
+            let total = gameQuestions.length;
+            let detailedResults = [];
+            
+            if (currentGame === 'phonics') {
+                gameAnswers.forEach((answer, index) => {
+                    if (gameQuestions[index] && gameQuestions[index].correct !== undefined) {
+                        const isCorrect = answer === gameQuestions[index].correct;
+                        if (isCorrect) score++;
+                        detailedResults.push({
+                            question: gameQuestions[index].word,
+                            userAnswer: gameQuestions[index].sounds[answer] || 'No answer',
+                            correctAnswer: gameQuestions[index].sounds[gameQuestions[index].correct],
+                            isCorrect: isCorrect
+                        });
+                    }
+                });
+            } else if (currentGame === 'word-building') {
+                gameAnswers.forEach((answer, index) => {
+                    if (gameQuestions[index] && gameQuestions[index].correct) {
+                        const isCorrect = answer === gameQuestions[index].correct;
+                        if (isCorrect) score++;
+                        detailedResults.push({
+                            question: gameQuestions[index].sounds.join(' + '),
+                            userAnswer: answer || 'No answer',
+                            correctAnswer: gameQuestions[index].correct,
+                            isCorrect: isCorrect
+                        });
+                    }
+                });
+            }
+            
+            const accuracy = total > 0 ? Math.round((score / total) * 100) : 0;
+            
+            displayResults({
+                success: true,
+                score: score,
+                total: total,
+                accuracy: accuracy,
+                details: detailedResults
+            });
+        }
+
+        function displayResults(result) {
+            const percentage = result.accuracy;
+            let emoji = percentage >= 90 ? '🏆' : percentage >= 80 ? '🎉' : percentage >= 70 ? '⭐' : percentage >= 60 ? '👍' : '💪';
+            let message = percentage >= 90 ? 'Outstanding! You\'re a phonics superstar!' : 
+                         percentage >= 80 ? 'Excellent work! You have great phonics skills!' : 
+                         percentage >= 70 ? 'Great job! You\'re doing really well!' :
+                         percentage >= 60 ? 'Good effort! Keep practicing to improve further.' : 
+                         'Keep practicing! You\'re making progress with every try.';
+            
+            let detailsHtml = '';
+            if (result.details && result.details.length > 0) {
+                detailsHtml = '<div style="margin-top: 2rem; text-align: left;"><h4 style="text-align: center; margin-bottom: 1rem; color: #3b82f6;">📋 Review Your Answers</h4>';
+                result.details.forEach((detail, index) => {
+                    const icon = detail.isCorrect ? '✅' : '❌';
+                    const bgColor = detail.isCorrect ? '#f0fdf4' : '#fef2f2';
+                    const borderColor = detail.isCorrect ? '#22c55e' : '#ef4444';
+                    
+                    detailsHtml += `
+                        <div style="background: ${bgColor}; border-left: 4px solid ${borderColor}; padding: 1rem; margin-bottom: 1rem; border-radius: 8px;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">${icon} Question ${index + 1}: ${detail.question}</div>
+                            <div style="color: #64748b;">Your answer: <span style="font-family: monospace; background: white; padding: 0.2rem 0.4rem; border-radius: 4px;">${detail.userAnswer}</span></div>
+                            ${!detail.isCorrect ? `<div style="color: #64748b;">Correct answer: <span style="font-family: monospace; background: white; padding: 0.2rem 0.4rem; border-radius: 4px; color: #059669; font-weight: bold;">${detail.correctAnswer}</span></div>` : ''}
+                        </div>
+                    `;
+                });
+                detailsHtml += '</div>';
+            }
+            
+            document.getElementById('gameContent').innerHTML = `
+                <div class="results-container">
+                    <div class="results-emoji">${emoji}</div>
+                    <h3 style="margin-bottom: 1rem; color: #1f2937;">Game Complete!</h3>
+                    <div class="results-score">
+                        Score: <strong>${result.score}</strong> / ${result.total}
+                    </div>
+                    <div class="results-accuracy">
+                        Accuracy: <strong>${percentage}%</strong>
+                    </div>
+                    <p style="color: #64748b; margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.6;">
+                        ${message}
+                    </p>
+                    ${detailsHtml}
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+                        <button onclick="restartGame()" class="btn btn-primary">
+                            <i class="fas fa-redo"></i> Play Again
+                        </button>
+                        <button onclick="closeGame()" class="btn btn-success">
+                            <i class="fas fa-home"></i> Back to Menu
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('submitAnswers').style.display = 'none';
+            document.getElementById('gameScore').textContent = `Final Score: ${result.score}/${result.total}`;
+            document.getElementById('progressBar').style.display = 'none';
+            
+            // Celebrate with confetti effect for high scores
+            if (percentage >= 80) {
+                setTimeout(createConfetti, 500);
+            }
+        }
+
+        function restartGame() {
+            if (currentGame === 'phonics') {
+                startPhonicGame();
+            } else if (currentGame === 'word-building') {
+                startWordBuilding();
+            }
+        }
+
+        function createConfetti() {
+            // Simple confetti animation
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.innerHTML = ['🎉', '⭐', '🌟', '✨', '🎊'][Math.floor(Math.random() * 5)];
+                    confetti.style.position = 'fixed';
+                    confetti.style.fontSize = Math.random() * 20 + 20 + 'px';
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.top = '-50px';
+                    confetti.style.zIndex = '10000';
+                    confetti.style.pointerEvents = 'none';
+                    confetti.style.transition = 'all 3s ease-out';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.style.top = window.innerHeight + 'px';
+                        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                        confetti.style.opacity = '0';
+                    }, 100);
+                    
+                    setTimeout(() => {
+                        if (confetti.parentNode) {
+                            confetti.parentNode.removeChild(confetti);
+                        }
+                    }, 3100);
+                }, i * 100);
+            }
+        }
+
+        function showModal() {
+            const modal = document.getElementById('gameModal');
+            modal.classList.add('active');
+        }
+
+        function closeGame() {
+            const modal = document.getElementById('gameModal');
+            modal.classList.remove('active');
+            
+            // Reset game state
+            currentGame = null;
+            gameAnswers = [];
+            gameQuestions = [];
+            currentQuestionIndex = 0;
+        }
+
+        // Enhanced audio functions
+        function playWordSound(word) {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.rate = 0.8;
+                utterance.volume = 0.9;
+                utterance.pitch = 1.1;
+                
+                const voices = speechSynthesis.getVoices();
+                const preferredVoice = voices.find(voice => 
+                    voice.name.includes('Female') || 
+                    voice.name.includes('Google UK English Female') ||
+                    (voice.lang.startsWith('en') && voice.name.includes('Female'))
+                );
+                
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+                
+                // Visual feedback
+                const buttons = document.querySelectorAll('.audio-btn');
+                buttons.forEach(btn => {
+                    if (btn.textContent.includes('Play Word')) {
+                        btn.style.transform = 'scale(1.1)';
+                        btn.style.boxShadow = '0 0 20px rgba(255, 255, 255, 0.8)';
+                        setTimeout(() => {
+                            btn.style.transform = 'scale(1)';
+                            btn.style.boxShadow = 'none';
+                        }, 1500);
+                    }
+                });
+                
+                speechSynthesis.speak(utterance);
+            } else {
+                alert('🔊 Audio not supported in this browser. Please try a different browser.');
+            }
+        }
+
+        function playSound(soundText) {
+            const cleanSound = soundText.replace(/-/g, '. ').replace(/\s+/g, ' ').trim();
+            
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(cleanSound);
+                utterance.rate = 0.4;
+                utterance.volume = 0.9;
+                utterance.pitch = 1.2;
+                
+                const voices = speechSynthesis.getVoices();
+                const preferredVoice = voices.find(voice => 
+                    voice.name.includes('Female') || 
+                    voice.name.includes('Google UK English Female') ||
+                    (voice.lang.startsWith('en') && voice.name.includes('Female'))
+                );
+                
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+                
+                speechSynthesis.speak(utterance);
+            } else {
+                alert('🔊 Audio not supported in this browser. Please try a different browser.');
+            }
+        }
+
+        // Initialize voices when available
+        speechSynthesis.addEventListener('voiceschanged', function() {
+            // Voices are now loaded
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('gameModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeGame();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeGame();
+            }
+        });
+    </script>
+</body>
+</html>

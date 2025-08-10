@@ -1,0 +1,623 @@
+{% extends "base.html" %}
+
+{% block title %}Math Games - Dyscalculia Support{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">🎮 Math Games</h1>
+        
+        <!-- Game Selection -->
+        <div class="grid md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-4xl mb-4">🔢</div>
+                <h3 class="text-xl font-semibold mb-2">Number Matching</h3>
+                <p class="text-gray-600 mb-4">Match numbers with their visual representations</p>
+                <button onclick="startGame('number-matching')" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+                    Play Game
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-4xl mb-4">➕</div>
+                <h3 class="text-xl font-semibold mb-2">Math Race</h3>
+                <p class="text-gray-600 mb-4">Solve math problems as quickly as possible</p>
+                <button onclick="startGame('math-race')" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
+                    Play Game
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-4xl mb-4">🎯</div>
+                <h3 class="text-xl font-semibold mb-2">Target Number</h3>
+                <p class="text-gray-600 mb-4">Use different operations to reach the target</p>
+                <button onclick="startGame('target-number')" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700">
+                    Play Game
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-4xl mb-4">📏</div>
+                <h3 class="text-xl font-semibold mb-2">Number Placement</h3>
+                <p class="text-gray-600 mb-4">Click on the number line where the number belongs</p>
+                <button onclick="startGame('number-placement')" class="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700">
+                    Play Game
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-4xl mb-4">🔢</div>
+                <h3 class="text-xl font-semibold mb-2">Number Sequence</h3>
+                <p class="text-gray-600 mb-4">Fill in the missing numbers in the sequence</p>
+                <button onclick="startGame('number-sequence')" class="w-full bg-teal-600 text-white py-2 rounded-lg hover:bg-teal-700">
+                    Play Game
+                </button>
+            </div>
+        </div>
+        
+        <!-- Game Area -->
+        <div id="gameArea" class="bg-white rounded-lg shadow-md p-6 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="gameTitle" class="text-2xl font-semibold">Math Game</h2>
+                <div class="flex space-x-4">
+                    <div id="gameScore" class="text-lg font-semibold">Score: 0</div>
+                    <div id="gameTimer" class="text-lg">Time: 60s</div>
+                </div>
+            </div>
+            
+            <div id="gameContent" class="text-center py-8">
+                <!-- Game content will be inserted here -->
+            </div>
+            
+            <div class="mt-6 text-center">
+                <button id="endGame" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700">
+                    End Game
+                </button>
+            </div>
+        </div>
+        
+        <!-- Results Modal -->
+        <div id="resultsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-md mx-4">
+                <h2 class="text-2xl font-bold mb-4">Game Results</h2>
+                <div id="resultsContent" class="mb-6">
+                    <!-- Results will be inserted here -->
+                </div>
+                <div class="flex space-x-4">
+                    <button onclick="playAgain()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        Play Again
+                    </button>
+                    <button onclick="closeResults()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class MathGames {
+    constructor() {
+        this.currentGame = null;
+        this.gameState = {
+            score: 0,
+            timeLeft: 60,
+            currentQuestion: 0,
+            totalQuestions: 0
+        };
+        this.gameTimer = null;
+        this.questions = [];
+        
+        this.bindEvents();
+    }
+    
+    bindEvents() {
+        document.getElementById('endGame').addEventListener('click', () => this.endGame());
+    }
+    
+    startGame(gameType) {
+        this.currentGame = gameType;
+        this.gameState = { score: 0, timeLeft: 60, currentQuestion: 0, totalQuestions: 10 };
+        
+        document.getElementById('gameArea').classList.remove('hidden');
+        document.getElementById('gameTitle').textContent = this.getGameTitle(gameType);
+        
+        this.generateQuestions(gameType);
+        this.startTimer();
+        this.showNextQuestion();
+    }
+    
+    getGameTitle(gameType) {
+        const titles = {
+            'number-matching': 'Number Matching',
+            'math-race': 'Math Race',
+            'target-number': 'Target Number',
+            'number-placement': 'Number Placement',
+            'number-sequence': 'Number Sequence'
+        };
+        return titles[gameType] || 'Math Game';
+    }
+    
+    generateQuestions(gameType) {
+        this.questions = [];
+        
+        for (let i = 0; i < this.gameState.totalQuestions; i++) {
+            if (gameType === 'number-matching') {
+                this.questions.push(this.generateNumberMatchingQuestion());
+            } else if (gameType === 'math-race') {
+                this.questions.push(this.generateMathRaceQuestion());
+            } else if (gameType === 'target-number') {
+                this.questions.push(this.generateTargetNumberQuestion());
+            } else if (gameType === 'number-placement') {
+                this.questions.push(this.generateNumberPlacementQuestion());
+            } else if (gameType === 'number-sequence') {
+                this.questions.push(this.generateNumberSequenceQuestion());
+            }
+        }
+    }
+    
+    generateNumberMatchingQuestion() {
+        const number = Math.floor(Math.random() * 20) + 1;
+        const representations = [
+            `${number}`,
+            `${'●'.repeat(number)}`,
+            `${this.numberToWords(number)}`,
+            `${number} objects`
+        ];
+        
+        const correct = representations[0];
+        const options = [correct];
+        
+        // Add wrong options
+        while (options.length < 4) {
+            const wrongNum = Math.floor(Math.random() * 20) + 1;
+            if (wrongNum !== number && !options.includes(wrongNum.toString())) {
+                options.push(wrongNum.toString());
+            }
+        }
+        
+        // Shuffle options
+        this.shuffleArray(options);
+        
+        return {
+            question: `Which number matches: ${representations[1]}?`,
+            options: options,
+            correct: correct,
+            type: 'multiple-choice'
+        };
+    }
+    
+    generateMathRaceQuestion() {
+        const operations = ['+', '-', '*'];
+        const operation = operations[Math.floor(Math.random() * operations.length)];
+        
+        let a, b, answer;
+        
+        if (operation === '+') {
+            a = Math.floor(Math.random() * 50) + 1;
+            b = Math.floor(Math.random() * 50) + 1;
+            answer = a + b;
+        } else if (operation === '-') {
+            a = Math.floor(Math.random() * 50) + 20;
+            b = Math.floor(Math.random() * (a - 1)) + 1;
+            answer = a - b;
+        } else { // multiplication
+            a = Math.floor(Math.random() * 12) + 1;
+            b = Math.floor(Math.random() * 12) + 1;
+            answer = a * b;
+        }
+        
+        const options = [answer];
+        
+        // Generate wrong options
+        while (options.length < 4) {
+            const wrong = answer + Math.floor(Math.random() * 20) - 10;
+            if (wrong > 0 && !options.includes(wrong)) {
+                options.push(wrong);
+            }
+        }
+        
+        this.shuffleArray(options);
+        
+        return {
+            question: `${a} ${operation} ${b} = ?`,
+            options: options,
+            correct: answer,
+            type: 'multiple-choice'
+        };
+    }
+    
+    generateTargetNumberQuestion() {
+        const numbers = [];
+        for (let i = 0; i < 4; i++) {
+            numbers.push(Math.floor(Math.random() * 10) + 1);
+        }
+        
+        const target = Math.floor(Math.random() * 30) + 5;
+        
+        return {
+            type: 'target-number',
+            numbers: numbers,
+            target: target
+        };
+    }
+
+    generateNumberPlacementQuestion() {
+        // Generate a range based on difficulty
+        const difficulty = Math.min(Math.floor(this.gameState.currentQuestion / 3) + 1, 5);
+        const rangeSize = 10 + (difficulty * 5); // 15, 20, 25, 30, 35
+        const startNum = Math.floor(Math.random() * 10) + 1;
+        const endNum = startNum + rangeSize;
+        
+        // Choose a random number within the range to place
+        const targetNumber = Math.floor(Math.random() * (endNum - startNum - 1)) + startNum + 1;
+        
+        // Generate number line positions (showing every 5th number for visual reference)
+        const positions = [];
+        for (let i = startNum; i <= endNum; i += 5) {
+            positions.push(i);
+        }
+        
+        return {
+            type: 'number-placement',
+            startNum: startNum,
+            endNum: endNum,
+            targetNumber: targetNumber,
+            positions: positions,
+            instruction: `Place ${targetNumber} on the number line`
+        };
+    }
+
+    generateNumberSequenceQuestion() {
+        // Generate sequence patterns based on difficulty
+        const difficulty = Math.min(Math.floor(this.gameState.currentQuestion / 3) + 1, 5);
+        const patterns = [
+            { step: 1, name: "counting by 1s" },
+            { step: 2, name: "counting by 2s" },
+            { step: 5, name: "counting by 5s" },
+            { step: 10, name: "counting by 10s" },
+            { step: 3, name: "counting by 3s" }
+        ];
+        
+        const pattern = patterns[Math.min(difficulty - 1, patterns.length - 1)];
+        const startNum = Math.floor(Math.random() * 10) + 1;
+        const sequenceLength = 7 + Math.floor(difficulty / 2); // 7-9 numbers
+        
+        // Generate complete sequence
+        const sequence = [];
+        for (let i = 0; i < sequenceLength; i++) {
+            sequence.push(startNum + (i * pattern.step));
+        }
+        
+        // Randomly remove 2-3 numbers to create blanks
+        const numBlanks = Math.min(2 + Math.floor(difficulty / 3), 3);
+        const blankIndices = [];
+        while (blankIndices.length < numBlanks) {
+            const randomIndex = Math.floor(Math.random() * (sequenceLength - 2)) + 1; // Not first or last
+            if (!blankIndices.includes(randomIndex)) {
+                blankIndices.push(randomIndex);
+            }
+        }
+        
+        // Create display sequence with blanks
+        const displaySequence = [...sequence];
+        const answers = {};
+        blankIndices.forEach(index => {
+            answers[index] = sequence[index];
+            displaySequence[index] = null; // null represents blank
+        });
+        
+        return {
+            type: 'number-sequence',
+            sequence: displaySequence,
+            answers: answers,
+            pattern: pattern,
+            instruction: `Fill in the missing numbers in this sequence (${pattern.name})`
+        };
+    }
+    
+    numberToWords(num) {
+        const words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+                      'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
+        return words[num] || num.toString();
+    }
+    
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+    
+    showNextQuestion() {
+        if (this.gameState.currentQuestion >= this.gameState.totalQuestions || this.gameState.timeLeft <= 0) {
+            this.endGame();
+            return;
+        }
+        
+        const question = this.questions[this.gameState.currentQuestion];
+        const content = document.getElementById('gameContent');
+        
+        if (question.type === 'multiple-choice') {
+            content.innerHTML = `
+                <div class="text-2xl mb-6">${question.question}</div>
+                <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                    ${question.options.map(option => 
+                        `<button onclick="mathGames.checkAnswer('${option}', '${question.correct}')" 
+                                class="bg-blue-100 hover:bg-blue-200 border border-blue-300 rounded-lg p-4 text-lg font-semibold transition-colors">
+                            ${option}
+                        </button>`
+                    ).join('')}
+                </div>
+            `;
+        } else if (question.type === 'input') {
+            content.innerHTML = `
+                <div class="text-2xl mb-6">${question.question}</div>
+                <div class="max-w-xs mx-auto">
+                    <input type="number" id="answerInput" class="w-full px-4 py-3 text-xl text-center border border-gray-300 rounded-lg mb-4" placeholder="Your answer">
+                    <button onclick="mathGames.checkInputAnswer(${question.answer})" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 text-lg font-semibold">
+                        Submit Answer
+                    </button>
+                </div>
+            `;
+            
+            // Focus on input
+            setTimeout(() => document.getElementById('answerInput').focus(), 100);
+        } else if (question.type === 'number-placement') {
+            content.innerHTML = `
+                <div class="text-xl mb-6 text-center">${question.instruction}</div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="relative bg-gray-100 rounded-lg p-4 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            ${question.positions.map(pos => 
+                                `<div class="text-sm font-semibold text-gray-600">${pos}</div>`
+                            ).join('')}
+                        </div>
+                        <div class="relative h-12 bg-blue-200 rounded-full cursor-pointer" 
+                             onclick="mathGames.handleNumberLineClick(event, ${question.startNum}, ${question.endNum}, ${question.targetNumber})">
+                            <div class="absolute top-0 left-0 right-0 h-full flex items-center">
+                                <div id="numberLine" class="w-full h-2 bg-blue-400 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <span class="text-lg font-bold text-blue-600">Click on the line to place ${question.targetNumber}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (question.type === 'number-sequence') {
+            const sequenceHtml = question.sequence.map((num, index) => {
+                if (num === null) {
+                    return `<input type="number" id="seq-${index}" 
+                                   class="w-16 h-16 text-xl text-center border-2 border-blue-300 rounded-lg bg-yellow-50 focus:bg-yellow-100 focus:outline-none focus:border-blue-500" 
+                                   placeholder="?">`;
+                } else {
+                    return `<div class="w-16 h-16 flex items-center justify-center text-xl font-bold bg-blue-100 border-2 border-blue-300 rounded-lg">${num}</div>`;
+                }
+            }).join('');
+            
+            content.innerHTML = `
+                <div class="text-xl mb-6 text-center">${question.instruction}</div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex flex-wrap justify-center gap-2 mb-6">
+                        ${sequenceHtml}
+                    </div>
+                    <div class="text-center">
+                        <button onclick="mathGames.checkSequenceAnswer()" 
+                                class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 text-lg font-semibold">
+                            Check Sequence
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        this.updateDisplay();
+    }
+    
+    checkAnswer(selected, correct) {
+        if (selected == correct) {
+            this.gameState.score++;
+            this.showFeedback(true);
+        } else {
+            this.showFeedback(false, correct);
+        }
+        
+        this.gameState.currentQuestion++;
+        setTimeout(() => this.showNextQuestion(), 1500);
+    }
+    
+    checkInputAnswer(correct) {
+        const input = document.getElementById('answerInput');
+        const userAnswer = parseInt(input.value);
+        
+        if (userAnswer === correct) {
+            this.gameState.score++;
+            this.showFeedback(true);
+        } else {
+            this.showFeedback(false, correct);
+        }
+        
+        this.gameState.currentQuestion++;
+        setTimeout(() => this.showNextQuestion(), 1500);
+    }
+    
+    handleNumberLineClick(event, startNum, endNum, targetNumber) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const percentage = clickX / rect.width;
+        const clickedNumber = Math.round(startNum + (percentage * (endNum - startNum)));
+        
+        // Show visual feedback
+        const marker = document.createElement('div');
+        marker.className = 'absolute w-4 h-4 bg-red-500 rounded-full transform -translate-x-2 -translate-y-2';
+        marker.style.left = `${percentage * 100}%`;
+        marker.style.top = '50%';
+        event.currentTarget.appendChild(marker);
+        
+        // Check if close enough (within 10% of range)
+        const tolerance = Math.max(1, Math.floor((endNum - startNum) * 0.1));
+        const isCorrect = Math.abs(clickedNumber - targetNumber) <= tolerance;
+        
+        setTimeout(() => {
+            if (isCorrect) {
+                this.gameState.score++;
+                this.showFeedback(true);
+            } else {
+                this.showFeedback(false, targetNumber);
+            }
+            
+            this.gameState.currentQuestion++;
+            setTimeout(() => this.showNextQuestion(), 1500);
+        }, 1000);
+    }
+    
+    checkSequenceAnswer() {
+        const question = this.questions[this.gameState.currentQuestion];
+        let isCorrect = true;
+        
+        for (const index in question.answers) {
+            const input = document.getElementById(`seq-${index}`);
+            const userAnswer = parseInt(input.value);
+            const correctAnswer = question.answers[index];
+            
+            if (userAnswer !== correctAnswer) {
+                isCorrect = false;
+                input.classList.add('border-red-500', 'bg-red-100');
+            } else {
+                input.classList.add('border-green-500', 'bg-green-100');
+            }
+        }
+        
+        setTimeout(() => {
+            if (isCorrect) {
+                this.gameState.score++;
+                this.showFeedback(true);
+            } else {
+                this.showFeedback(false);
+            }
+            
+            this.gameState.currentQuestion++;
+            setTimeout(() => this.showNextQuestion(), 1500);
+        }, 1500);
+    }
+    
+    showFeedback(isCorrect, correctAnswer = null) {
+        const content = document.getElementById('gameContent');
+        
+        if (isCorrect) {
+            content.innerHTML = `
+                <div class="text-6xl mb-4">🎉</div>
+                <div class="text-2xl text-green-600 font-bold">Correct!</div>
+            `;
+        } else {
+            content.innerHTML = `
+                <div class="text-6xl mb-4">😅</div>
+                <div class="text-2xl text-red-600 font-bold">Not quite!</div>
+                ${correctAnswer ? `<div class="text-lg mt-2">The correct answer was: ${correctAnswer}</div>` : ''}
+            `;
+        }
+    }
+    
+    startTimer() {
+        this.gameTimer = setInterval(() => {
+            this.gameState.timeLeft--;
+            this.updateDisplay();
+            
+            if (this.gameState.timeLeft <= 0) {
+                this.endGame();
+            }
+        }, 1000);
+    }
+    
+    updateDisplay() {
+        document.getElementById('gameScore').textContent = `Score: ${this.gameState.score}`;
+        document.getElementById('gameTimer').textContent = `Time: ${this.gameState.timeLeft}s`;
+    }
+    
+    endGame() {
+        if (this.gameTimer) {
+            clearInterval(this.gameTimer);
+            this.gameTimer = null;
+        }
+        
+        this.showResults();
+    }
+    
+    showResults() {
+        const modal = document.getElementById('resultsModal');
+        const content = document.getElementById('resultsContent');
+        
+        const percentage = Math.round((this.gameState.score / this.gameState.totalQuestions) * 100);
+        let performance, emoji;
+        
+        if (percentage >= 80) {
+            performance = 'Excellent!';
+            emoji = '🏆';
+        } else if (percentage >= 60) {
+            performance = 'Good job!';
+            emoji = '👍';
+        } else {
+            performance = 'Keep practicing!';
+            emoji = '💪';
+        }
+        
+        content.innerHTML = `
+            <div class="text-center">
+                <div class="text-6xl mb-4">${emoji}</div>
+                <div class="text-2xl font-bold mb-2">${performance}</div>
+                <div class="text-lg mb-4">Final Score: ${this.gameState.score}/${this.gameState.totalQuestions}</div>
+                <div class="text-lg">Accuracy: ${percentage}%</div>
+            </div>
+        `;
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // Save results
+        this.saveResults();
+    }
+    
+    async saveResults() {
+        try {
+            await fetch('/dyscalculia/save-game-results', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    game_type: this.currentGame,
+                    score: this.gameState.score,
+                    total: this.gameState.totalQuestions,
+                    accuracy: (this.gameState.score / this.gameState.totalQuestions) * 100
+                })
+            });
+        } catch (error) {
+            console.error('Error saving results:', error);
+        }
+    }
+}
+
+function startGame(gameType) {
+    if (!window.mathGames) {
+        window.mathGames = new MathGames();
+    }
+    window.mathGames.startGame(gameType);
+}
+
+function playAgain() {
+    closeResults();
+    window.mathGames.startGame(window.mathGames.currentGame);
+}
+
+function closeResults() {
+    const modal = document.getElementById('resultsModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    window.mathGames = new MathGames();
+});
+</script>
+{% endblock %}

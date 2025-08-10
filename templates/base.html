@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Learning Disability Support Platform{% endblock %}</title>
+    
+    <!-- CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'dyslexic': ['Atkinson Hyperlegible', 'OpenDyslexic', 'monospace'],
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'dyslexia-blue': '#3b82f6',
+                        'dyslexia-green': '#10b981',
+                        'dyslexia-purple': '#8b5cf6',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+        
+        .dyslexic-font {
+            font-family: 'OpenDyslexic', sans-serif;
+        }
+        
+        /* OpenDyslexic Font for Writing Areas */
+        @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
+        
+        .writing-area-dyslexic {
+            font-family: 'Atkinson Hyperlegible', 'OpenDyslexic', monospace !important;
+            letter-spacing: 0.05em;
+            word-spacing: 0.1em;
+        }
+        
+        /* Writing Tools Styles */
+        .writing-tool-active {
+            background-color: #3b82f6 !important;
+        }
+        
+        /* Accessibility Improvements */
+        .high-contrast {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+        }
+        
+        .focus-outline {
+            outline: 3px solid #fbbf24;
+            outline-offset: 2px;
+        }
+        
+        /* Animation for smooth transitions */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+        
+        .nav-item {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #fbbf24;
+            color: white;
+        }
+        
+        .nav-item i {
+            width: 20px;
+            margin-right: 1rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 0;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .main-content.sidebar-open {
+            margin-left: 280px;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        /* Content Area */
+        .content {
+            padding: 2rem;
+        }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        
+        .card-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        /* Grid System */
+        .grid {
+            display: grid;
+            gap: 2rem;
+        }
+        
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+        
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            min-height: 120px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+            }
+            
+            .main-content.sidebar-open {
+                margin-left: 0;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .content {
+                padding: 1rem;
+            }
+            
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Module Colors */
+        .dyslexia-color { color: #3b82f6; }
+        .dyscalculia-color { color: #10b981; }
+        .dysgraphia-color { color: #f59e0b; }
+        .dyspraxia-color { color: #ef4444; }
+        
+        .dyslexia-bg { background: #dbeafe; }
+        .dyscalculia-bg { background: #d1fae5; }
+        .dysgraphia-bg { background: #fef3c7; }
+        .dyspraxia-bg { background: #fee2e2; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-brain"></i> Learning Support</h2>
+            <p>Comprehensive Learning Disability Platform</p>
+        </div>
+        
+        <div class="sidebar-nav">
+            {% if session.role == 'doctor' %}
+                <a href="/doctor/dashboard" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <a href="/doctor/profile" class="nav-item">
+                    <i class="fas fa-user-md"></i>
+                    Profile
+                </a>
+                <a href="/doctor/patient_reports" class="nav-item">
+                    <i class="fas fa-file-medical"></i>
+                    Patient Reports
+                </a>
+                <a href="/auth/logout" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            {% elif session.user_id %}
+                <a href="/dashboard" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <a href="/dyslexia" class="nav-item">
+                    <i class="fas fa-book-open"></i>
+                    Dyslexia Support
+                </a>
+                <a href="/dyscalculia" class="nav-item">
+                    <i class="fas fa-calculator"></i>
+                    Dyscalculia Support
+                </a>
+                <a href="/dysgraphia" class="nav-item">
+                    <i class="fas fa-pen"></i>
+                    Dysgraphia Support
+                </a>
+                <a href="/dyspraxia" class="nav-item">
+                    <i class="fas fa-running"></i>
+                    Dyspraxia Support
+                </a>
+                <a href="/auth/profile" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    Profile
+                </a>
+                <a href="/auth/logout" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            {% else %}
+                <a href="/auth/login" class="nav-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login
+                </a>
+                <a href="/auth/register" class="nav-item">
+                    <i class="fas fa-user-plus"></i>
+                    Register
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Header -->
+        <header class="header">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="user-info">
+                {% if session.role == 'doctor' %}
+                    <span>Welcome, Dr. {{ session.username }}!</span>
+                    <a href="/auth/logout" class="btn btn-danger">Logout</a>
+                {% elif session.user_id %}
+                    <span>Welcome, {{ session.username }}!</span>
+                    <a href="/auth/logout" class="btn btn-danger">Logout</a>
+                {% else %}
+                    <a href="/auth/login" class="btn btn-primary">Login</a>
+                {% endif %}
+            </div>
+        </header>
+        
+        <!-- Content Area -->
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // Sidebar Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            mainContent.classList.toggle('sidebar-open');
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                    mainContent.classList.remove('sidebar-open');
+                }
+            }
+        });
+        
+        // Active navigation highlighting
+        const currentPath = window.location.pathname;
+        const navItems = document.querySelectorAll('.nav-item');
+        
+        navItems.forEach(item => {
+            if (item.getAttribute('href') === currentPath || 
+                (currentPath.startsWith(item.getAttribute('href')) && item.getAttribute('href') !== '/')) {
+                item.classList.add('active');
+            }
+        });
+        
+        // Notification system
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type}`;
+            notification.textContent = message;
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '300px';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+        
+        // Global error handler
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.error);
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

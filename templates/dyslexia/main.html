@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Dyslexia Support - Learning Platform{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title dyslexic-font">📖 Dyslexia Support Center</h1>
+        <p style="color: #64748b;">Tools and activities to improve reading skills and comprehension</p>
+    </div>
+</div>
+
+<div class="grid grid-3">
+    <div class="card dyslexia-bg">
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-book-reader dyslexia-color" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 1rem;">Smart Text Reader</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">AI-powered text simplification with read-aloud features</p>
+            <a href="/dyslexia/reader" class="btn btn-primary" style="width: 100%;">Start Reading</a>
+        </div>
+    </div>
+    
+    <div class="card dyslexia-bg">
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-gamepad dyslexia-color" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 1rem;">Phonics Games</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">Interactive games for sound-letter recognition</p>
+            <a href="/dyslexia/games" class="btn btn-primary" style="width: 100%;">Play Games</a>
+        </div>
+    </div>
+    
+    <div class="card dyslexia-bg">
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-chart-line dyslexia-color" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 1rem;">Progress Tracking</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">Monitor reading speed and comprehension improvement</p>
+            <a href="/dashboard" class="btn btn-primary" style="width: 100%;">View Progress</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">About Dyslexia Support</h3>
+    </div>
+    
+    <div class="grid grid-2">
+        <div>
+            <h4 style="margin-bottom: 1rem; color: #3b82f6;">What is Dyslexia?</h4>
+            <p style="color: #64748b; line-height: 1.8; margin-bottom: 1.5rem;">
+                Dyslexia is a learning disability that affects reading fluency and comprehension. 
+                Our platform provides specialized tools to help overcome these challenges through 
+                AI-powered text simplification, phonics training, and personalized learning experiences.
+            </p>
+            
+            <h4 style="margin-bottom: 1rem; color: #3b82f6;">How We Help</h4>
+            <ul style="color: #64748b; line-height: 1.8;">
+                <li>Text simplification that preserves meaning</li>
+                <li>Adjustable fonts and spacing for better readability</li>
+                <li>Text-to-speech with synchronized highlighting</li>
+                <li>Phonics games for sound-letter mapping</li>
+                <li>Progress tracking and personalized recommendations</li>
+            </ul>
+        </div>
+        
+        <div>
+            <h4 style="margin-bottom: 1rem; color: #3b82f6;">Features Available</h4>
+            <div style="display: grid; gap: 1rem;">
+                <div style="padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                    <strong>Smart Text Reader</strong>
+                    <p style="color: #64748b; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                        Paste any text and get an AI-simplified version that's easier to read
+                    </p>
+                </div>
+                
+                <div style="padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                    <strong>Phonics Training</strong>
+                    <p style="color: #64748b; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                        Interactive games to improve sound-letter recognition and phonemic awareness
+                    </p>
+                </div>
+                
+                <div style="padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                    <strong>Reading Analytics</strong>
+                    <p style="color: #64748b; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                        Track reading speed, accuracy, and comprehension improvements over time
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

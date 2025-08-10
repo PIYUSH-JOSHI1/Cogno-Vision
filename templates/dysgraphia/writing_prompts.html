@@ -1,0 +1,572 @@
+{% extends "base.html" %}
+
+{% block title %}Writing Prompts - Cogno Solution{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">✍️ Writing Prompts</h1>
+        
+        <!-- Prompt Generator -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Get a Writing Prompt</h2>
+            <div class="flex space-x-4 mb-4">
+                <select id="promptCategory" class="border rounded-lg px-4 py-2">
+                    <option value="general">General</option>
+                    <option value="personal">Personal</option>
+                    <option value="creative">Creative</option>
+                    <option value="descriptive">Descriptive</option>
+                </select>
+                <select id="promptDifficulty" class="border rounded-lg px-4 py-2">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+                <button id="generatePrompt" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                    Generate Prompt
+                </button>
+            </div>
+            
+            <div id="currentPrompt" class="bg-blue-50 p-4 rounded-lg mb-4 hidden">
+                <h3 class="font-semibold mb-2">Your Writing Prompt:</h3>
+                <p id="promptText" class="text-lg"></p>
+            </div>
+        </div>
+        
+        <!-- Writing Area -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Write Your Response</h2>
+            
+            <!-- Writing Tools -->
+            <div class="flex flex-wrap gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                <button id="increaseFontSize" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">
+                    A+
+                </button>
+                <button id="decreaseFontSize" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">
+                    A-
+                </button>
+                <button id="toggleLineSpacing" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">
+                    Line Spacing
+                </button>
+                <button id="toggleFont" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">
+                    Dyslexic Font
+                </button>
+                <button id="readAloud" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                    🔊 Read Aloud
+                </button>
+                <button id="spellCheck" class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">
+                    ✓ Spell Check
+                </button>
+            </div>
+            
+            <textarea id="writingArea" 
+                      class="w-full h-64 p-4 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                      placeholder="Start writing your response here..."
+                      style="font-size: 16px; line-height: 1.5; font-family: 'Inter', sans-serif;"></textarea>
+            
+            <div class="flex justify-between items-center mt-4">
+                <div class="text-sm text-gray-600">
+                    Words: <span id="wordCount">0</span> | 
+                    Characters: <span id="charCount">0</span> |
+                    Time: <span id="writingTime">00:00</span>
+                </div>
+                <div class="space-x-4">
+                    <button id="saveWriting" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        Save Writing
+                    </button>
+                    <button id="analyzeWriting" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        Analyze Writing
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analysis Results -->
+        <div id="analysisResults" class="bg-white rounded-lg shadow-md p-6 hidden">
+            <h2 class="text-2xl font-semibold mb-4">Writing Analysis</h2>
+            <div id="analysisContent">
+                <!-- Analysis results will be inserted here -->
+            </div>
+        </div>
+        
+        <!-- Writing History -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4">Your Writing History</h2>
+            <div id="writingHistory" class="space-y-4">
+                <!-- Writing history will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class WritingPrompts {
+    constructor() {
+        this.currentFontSize = 16;
+        this.currentLineSpacing = 1.5;
+        this.isDyslexicFont = false;
+        this.startTime = null;
+        this.timerInterval = null;
+        
+        this.prompts = {
+            general: {
+                easy: [
+                    "Write about your favorite day of the week and why you like it.",
+                    "Describe what you did yesterday from morning to night.",
+                    "Write about your favorite food and why you enjoy it.",
+                    "Tell about a time when you helped someone.",
+                    "Describe your bedroom and what makes it special."
+                ],
+                medium: [
+                    "Write about a challenge you overcame and how it made you feel.",
+                    "Describe a place you would like to visit and explain why.",
+                    "Write about a skill you would like to learn and your plan to learn it.",
+                    "Tell about a time when you had to make a difficult decision.",
+                    "Describe how you think the world will be different in 10 years."
+                ],
+                hard: [
+                    "Write about a social issue that concerns you and propose a solution.",
+                    "Describe how technology has changed the way people communicate.",
+                    "Write about the importance of preserving the environment for future generations.",
+                    "Discuss the role of education in personal development.",
+                    "Analyze the impact of social media on modern relationships."
+                ]
+            },
+            personal: {
+                easy: [
+                    "Write about your family and what makes them special.",
+                    "Describe your best friend and why you like them.",
+                    "Tell about your favorite hobby or activity.",
+                    "Write about a happy memory from your childhood.",
+                    "Describe what you want to be when you grow up."
+                ],
+                medium: [
+                    "Write about a person who has influenced your life positively.",
+                    "Describe a goal you have and your plan to achieve it.",
+                    "Tell about a time when you learned something important about yourself.",
+                    "Write about a tradition in your family that you value.",
+                    "Describe how you handle stress or difficult situations."
+                ],
+                hard: [
+                    "Reflect on how your values and beliefs have shaped who you are today.",
+                    "Write about a life lesson you learned through a difficult experience.",
+                    "Describe how you have grown as a person over the past year.",
+                    "Analyze your strengths and areas for improvement.",
+                    "Write about your vision for your future and the steps to get there."
+                ]
+            },
+            creative: {
+                easy: [
+                    "Write a story about a magical pet that can talk.",
+                    "Describe a day when everything went perfectly.",
+                    "Create a story about finding a treasure map.",
+                    "Write about a world where animals can drive cars.",
+                    "Tell a story about a superhero who helps with everyday problems."
+                ],
+                medium: [
+                    "Write a story about time travel to any period in history.",
+                    "Create a tale about a character who can read minds.",
+                    "Write about a world where colors have disappeared.",
+                    "Tell a story about a mysterious door that appears in your room.",
+                    "Create a story about living in a city in the clouds."
+                ],
+                hard: [
+                    "Write a complex story with multiple characters and plot twists.",
+                    "Create a science fiction story about colonizing another planet.",
+                    "Write a mystery story where the reader must solve the puzzle.",
+                    "Tell a story that explores themes of identity and belonging.",
+                    "Create a dystopian story about a society with unusual rules."
+                ]
+            },
+            descriptive: {
+                easy: [
+                    "Describe your favorite season and what you like about it.",
+                    "Write about the sounds, smells, and sights of your neighborhood.",
+                    "Describe a delicious meal in detail.",
+                    "Write about the feeling of your favorite weather.",
+                    "Describe a place where you feel completely relaxed."
+                ],
+                medium: [
+                    "Describe a bustling marketplace using all five senses.",
+                    "Write about the atmosphere of a library or bookstore.",
+                    "Describe the experience of watching a sunrise or sunset.",
+                    "Write about the feeling of accomplishing something difficult.",
+                    "Describe a storm from the perspective of someone watching it."
+                ],
+                hard: [
+                    "Describe an abstract concept like 'freedom' or 'happiness' in concrete terms.",
+                    "Write about a complex emotion using sensory details.",
+                    "Describe a historical event as if you were witnessing it.",
+                    "Write about the passage of time in a specific location.",
+                    "Describe the atmosphere of a significant cultural event."
+                ]
+            }
+        };
+        
+        this.initializeElements();
+        this.bindEvents();
+        this.loadWritingHistory();
+    }
+    
+    initializeElements() {
+        this.promptCategory = document.getElementById('promptCategory');
+        this.promptDifficulty = document.getElementById('promptDifficulty');
+        this.generatePromptBtn = document.getElementById('generatePrompt');
+        this.currentPrompt = document.getElementById('currentPrompt');
+        this.promptText = document.getElementById('promptText');
+        this.writingArea = document.getElementById('writingArea');
+        this.wordCount = document.getElementById('wordCount');
+        this.charCount = document.getElementById('charCount');
+        this.writingTime = document.getElementById('writingTime');
+        this.analysisResults = document.getElementById('analysisResults');
+        this.analysisContent = document.getElementById('analysisContent');
+        this.writingHistory = document.getElementById('writingHistory');
+    }
+    
+    bindEvents() {
+        this.generatePromptBtn.addEventListener('click', () => this.generatePrompt());
+        
+        // Writing tools
+        document.getElementById('increaseFontSize').addEventListener('click', () => this.adjustFontSize(2));
+        document.getElementById('decreaseFontSize').addEventListener('click', () => this.adjustFontSize(-2));
+        document.getElementById('toggleLineSpacing').addEventListener('click', () => this.toggleLineSpacing());
+        document.getElementById('toggleFont').addEventListener('click', () => this.toggleDyslexicFont());
+        document.getElementById('readAloud').addEventListener('click', () => this.readAloud());
+        document.getElementById('spellCheck').addEventListener('click', () => this.spellCheck());
+        
+        // Writing actions
+        document.getElementById('saveWriting').addEventListener('click', () => this.saveWriting());
+        document.getElementById('analyzeWriting').addEventListener('click', () => this.analyzeWriting());
+        
+        // Writing area events
+        this.writingArea.addEventListener('input', () => this.updateCounts());
+        this.writingArea.addEventListener('focus', () => this.startTimer());
+        this.writingArea.addEventListener('blur', () => this.pauseTimer());
+    }
+    
+    generatePrompt() {
+        const category = this.promptCategory.value;
+        const difficulty = this.promptDifficulty.value;
+        const prompts = this.prompts[category][difficulty];
+        const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+        
+        this.promptText.textContent = randomPrompt;
+        this.currentPrompt.classList.remove('hidden');
+        
+        // Clear previous writing
+        this.writingArea.value = '';
+        this.updateCounts();
+        this.resetTimer();
+    }
+    
+    adjustFontSize(change) {
+        this.currentFontSize = Math.max(12, Math.min(24, this.currentFontSize + change));
+        this.writingArea.style.fontSize = this.currentFontSize + 'px';
+        
+        // Update button states
+        const increaseBtn = document.getElementById('increaseFontSize');
+        const decreaseBtn = document.getElementById('decreaseFontSize');
+        
+        // Update button text to show current size
+        increaseBtn.innerHTML = `A+ <span class="text-xs">(${this.currentFontSize}px)</span>`;
+        decreaseBtn.innerHTML = `A- <span class="text-xs">(${this.currentFontSize}px)</span>`;
+        
+        // Disable buttons at limits
+        if (this.currentFontSize >= 24) {
+            increaseBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            increaseBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+        
+        if (this.currentFontSize <= 12) {
+            decreaseBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            decreaseBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    }
+    
+    toggleLineSpacing() {
+        const button = document.getElementById('toggleLineSpacing');
+        
+        if (this.currentLineSpacing === 1.5) {
+            this.currentLineSpacing = 2.0;
+            button.textContent = 'Normal Spacing';
+            button.classList.add('writing-tool-active');
+        } else if (this.currentLineSpacing === 2.0) {
+            this.currentLineSpacing = 2.5;
+            button.textContent = 'Wide Spacing';
+        } else {
+            this.currentLineSpacing = 1.5;
+            button.textContent = 'Line Spacing';
+            button.classList.remove('writing-tool-active');
+        }
+        
+        this.writingArea.style.lineHeight = this.currentLineSpacing;
+    }
+    
+    toggleDyslexicFont() {
+        this.isDyslexicFont = !this.isDyslexicFont;
+        const button = document.getElementById('toggleFont');
+        
+        if (this.isDyslexicFont) {
+            this.writingArea.classList.add('writing-area-dyslexic');
+            this.writingArea.style.fontFamily = 'Atkinson Hyperlegible, OpenDyslexic, monospace';
+            button.classList.add('writing-tool-active');
+            button.textContent = 'Normal Font';
+        } else {
+            this.writingArea.classList.remove('writing-area-dyslexic');
+            this.writingArea.style.fontFamily = 'Inter, sans-serif';
+            button.classList.remove('writing-tool-active');
+            button.textContent = 'Dyslexic Font';
+        }
+    }
+    
+    readAloud() {
+        const text = this.writingArea.value;
+        if (!text.trim()) {
+            alert('Please write something first!');
+            return;
+        }
+        
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.8;
+            utterance.pitch = 1.0;
+            speechSynthesis.speak(utterance);
+        } else {
+            alert('Text-to-speech not supported in your browser');
+        }
+    }
+    
+    spellCheck() {
+        const text = this.writingArea.value;
+        const words = text.split(/\s+/);
+        const misspelledWords = [];
+        
+        // Simple spell check (in production, use a proper spell check API)
+        const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
+        
+        words.forEach(word => {
+            const cleanWord = word.replace(/[^\w]/g, '').toLowerCase();
+            if (cleanWord.length > 2 && !commonWords.includes(cleanWord)) {
+                // Simulate spell check
+                if (Math.random() < 0.1) { // 10% chance of being marked as misspelled
+                    misspelledWords.push(word);
+                }
+            }
+        });
+        
+        if (misspelledWords.length > 0) {
+            alert(`Possible misspellings: ${misspelledWords.join(', ')}`);
+        } else {
+            alert('No spelling errors detected!');
+        }
+    }
+    
+    updateCounts() {
+        const text = this.writingArea.value;
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const chars = text.length;
+        
+        this.wordCount.textContent = words;
+        this.charCount.textContent = chars;
+    }
+    
+    startTimer() {
+        if (!this.startTime) {
+            this.startTime = Date.now();
+        }
+        
+        if (!this.timerInterval) {
+            this.timerInterval = setInterval(() => {
+                const elapsed = Date.now() - this.startTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                this.writingTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+    }
+    
+    pauseTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+    }
+    
+    resetTimer() {
+        this.pauseTimer();
+        this.startTime = null;
+        this.writingTime.textContent = '00:00';
+    }
+    
+    async saveWriting() {
+        const text = this.writingArea.value.trim();
+        if (!text) {
+            alert('Please write something first!');
+            return;
+        }
+        
+        const prompt = this.promptText.textContent;
+        const wordCount = text.split(/\s+/).length;
+        const timeSpent = this.writingTime.textContent;
+        
+        try {
+            const response = await fetch('/dysgraphia/save-writing', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    text: text,
+                    word_count: wordCount,
+                    time_spent: timeSpent,
+                    category: this.promptCategory.value,
+                    difficulty: this.promptDifficulty.value
+                })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                alert('Writing saved successfully!');
+                this.loadWritingHistory();
+            } else {
+                alert('Error saving writing: ' + result.message);
+            }
+        } catch (error) {
+            alert('Error saving writing');
+        }
+    }
+    
+    async analyzeWriting() {
+        const text = this.writingArea.value.trim();
+        if (!text) {
+            alert('Please write something first!');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/dysgraphia/analyze-writing', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                this.displayAnalysis(result.analysis);
+            } else {
+                alert('Error analyzing writing: ' + result.message);
+            }
+        } catch (error) {
+            alert('Error analyzing writing');
+        }
+    }
+    
+    displayAnalysis(analysis) {
+        let html = `
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Writing Statistics</h3>
+                    <div class="space-y-2">
+                        <div>Word Count: <span class="font-semibold">${analysis.word_count}</span></div>
+                        <div>Sentence Count: <span class="font-semibold">${analysis.sentence_count}</span></div>
+                        <div>Average Words per Sentence: <span class="font-semibold">${(analysis.word_count / analysis.sentence_count).toFixed(1)}</span></div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Writing Quality</h3>
+                    <div class="space-y-2">
+                        <div>Overall Score: <span class="font-semibold text-blue-600">${this.calculateWritingScore(analysis)}/100</span></div>
+                        <div>Readability: <span class="font-semibold">${this.getReadabilityLevel(analysis)}</span></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        if (analysis.issues && analysis.issues.length > 0) {
+            html += `
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold mb-3">Areas for Improvement</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        ${analysis.issues.map(issue => `<li class="text-red-600">${issue}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        if (analysis.suggestions && analysis.suggestions.length > 0) {
+            html += `
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold mb-3">Suggestions</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        ${analysis.suggestions.map(suggestion => `<li class="text-green-600">${suggestion}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        this.analysisContent.innerHTML = html;
+        this.analysisResults.classList.remove('hidden');
+    }
+    
+    calculateWritingScore(analysis) {
+        let score = 70; // Base score
+        
+        // Bonus for word count
+        if (analysis.word_count >= 100) score += 10;
+        else if (analysis.word_count >= 50) score += 5;
+        
+        // Penalty for issues
+        score -= (analysis.issues?.length || 0) * 5;
+        
+        return Math.max(0, Math.min(100, score));
+    }
+    
+    getReadabilityLevel(analysis) {
+        const avgWordsPerSentence = analysis.word_count / analysis.sentence_count;
+        
+        if (avgWordsPerSentence <= 10) return 'Easy';
+        if (avgWordsPerSentence <= 15) return 'Medium';
+        return 'Advanced';
+    }
+    
+    async loadWritingHistory() {
+        try {
+            const response = await fetch('/dysgraphia/writing-history');
+            const result = await response.json();
+            
+            if (result.success && result.history.length > 0) {
+                let html = '';
+                result.history.forEach(item => {
+                    const date = new Date(item.timestamp).toLocaleDateString();
+                    html += `
+                        <div class="border rounded-lg p-4 hover:bg-gray-50">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-semibold">${item.prompt || 'Writing Practice'}</h4>
+                                <span class="text-sm text-gray-500">${date}</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">${item.text_sample}</p>
+                            <div class="flex space-x-4 text-xs text-gray-500">
+                                <span>Words: ${item.word_count}</span>
+                                <span>Time: ${item.time_spent || 'N/A'}</span>
+                                <span>Category: ${item.category || 'General'}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                this.writingHistory.innerHTML = html;
+            } else {
+                this.writingHistory.innerHTML = '<p class="text-gray-500 italic">No writing history yet. Start writing to see your progress!</p>';
+            }
+        } catch (error) {
+            this.writingHistory.innerHTML = '<p class="text-red-500">Error loading writing history</p>';
+        }
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new WritingPrompts();
+});
+</script>
+{% endblock %}
